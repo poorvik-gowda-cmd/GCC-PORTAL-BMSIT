@@ -1,0 +1,47 @@
+﻿# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Cloudflare local secrets
+.dev.vars
+.wrangler/
+
+# Build output
+.next/
+out/
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local databases / temporary files
+*.sqlite
+*.sqlite3
+*.db
+
+# Certificates / private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Google credentials
+service-account*.json
+credentials*.json
+google-credentials*.json
+

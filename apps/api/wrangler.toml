@@ -1,0 +1,53 @@
+
+# GCC Portal API — Cloudflare Worker Configuration
+# apps/api/wrangler.toml
+#
+# SECRETS — set via `wrangler secret put`, NEVER in this file:
+#   wrangler secret put SESSION_SECRET
+#   wrangler secret put TURNSTILE_SECRET_KEY
+#   wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
+#   wrangler secret put GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+
+name = "gcc-portal-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Development (wrangler dev) ──────────────────────────────────────────────
+[vars]
+APP_ENV = "development"
+ALLOWED_ORIGINS = "http://localhost:3000"
+GOOGLE_SHEETS_SPREADSHEET_ID = "1_FZpVwncW3mNOrwp62T4uoIwkBeXYb6ge1BXgARcafM"
+GOOGLE_DRIVE_ROOT_FOLDER_ID  = "1LafIbcge-2_pTd2KROcZ_X6wn9c_j9UT"
+
+[[d1_databases]]
+binding        = "DB"
+database_name  = "gcc_portal_db_dev"
+database_id    = "local-d1-db-dev"
+migrations_dir = "../../packages/database/migrations"
+
+# ── Preview (branch / PR deployments) ──────────────────────────────────────
+[env.preview.vars]
+APP_ENV                       = "preview"
+ALLOWED_ORIGINS               = "https://gcc-portal-web.pages.dev"
+GOOGLE_SHEETS_SPREADSHEET_ID  = "1_FZpVwncW3mNOrwp62T4uoIwkBeXYb6ge1BXgARcafM"
+GOOGLE_DRIVE_ROOT_FOLDER_ID   = "1LafIbcge-2_pTd2KROcZ_X6wn9c_j9UT"
+
+[[env.preview.d1_databases]]
+binding        = "DB"
+database_name  = "gcc_portal_db_preview"
+database_id    = "REPLACE_WITH_PREVIEW_D1_DATABASE_ID"
+migrations_dir = "../../packages/database/migrations"
+
+# ── Production ──────────────────────────────────────────────────────────────
+[env.production.vars]
+APP_ENV                       = "production"
+ALLOWED_ORIGINS               = "https://gcc.bmsit.ac.in"
+GOOGLE_SHEETS_SPREADSHEET_ID  = "1_FZpVwncW3mNOrwp62T4uoIwkBeXYb6ge1BXgARcafM"
+GOOGLE_DRIVE_ROOT_FOLDER_ID   = "1LafIbcge-2_pTd2KROcZ_X6wn9c_j9UT"
+
+[[env.production.d1_databases]]
+binding        = "DB"
+database_name  = "gcc-portal-db"
+database_id    = "2bbe2d01-450f-4e50-a608-069f34008425"
+migrations_dir = "../../packages/database/migrations"

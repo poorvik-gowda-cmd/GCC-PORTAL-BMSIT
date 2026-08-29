@@ -1,0 +1,28 @@
+{
+  "name": "@gcc-portal/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 8787 --ip 127.0.0.1",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --dir ../../tests/unit",
+    "test:watch": "vitest --dir ../../tests/unit"
+  },
+  "dependencies": {
+    "@gcc-portal/contracts": "*",
+    "@gcc-portal/permissions": "*",
+    "@gcc-portal/database": "*",
+    "@gcc-portal/google-adapters": "*",
+    "@hono/zod-validator": "^0.2.2",
+    "hono": "^4.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240718.0",
+    "typescript": "*",
+    "vitest": "^1.6.0",
+    "wrangler": "^3.60.0"
+  }
+}
