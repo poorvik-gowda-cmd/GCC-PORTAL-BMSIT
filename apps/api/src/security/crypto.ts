@@ -3,7 +3,7 @@
 // apps/api/src/security/crypto.ts
 // ==========================================================
 
-const PBKDF2_ITERATIONS = 310_000;
+const PBKDF2_ITERATIONS = 100_000;
 const SALT_LENGTH = 32;
 
 export async function hashPassword(password: string): Promise<string> {
