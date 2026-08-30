@@ -91,7 +91,7 @@ export default function SystemAdminPage() {
   const [newEmail, setNewEmail] = useState("");
   const [newFullName, setNewFullName] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newDept, setNewDept] = useState<string>("EXECUTION_COUNCIL");
+  const [newDept, setNewDept] = useState<string>("EXECUTIVE_COUNCIL");
   const [newRole, setNewRole] = useState<string>("DEPARTMENT_MEMBER");
 
   // Form states for Manage Selected User

@@ -7,16 +7,29 @@ import { execSync } from "child_process";
 
 const H = "pbkdf2:310000:a166c096fcfdec217dbc09ba3df74d1e01e4ade8e2ba85a1d9af8f06ce1af8de:d7f7540b987e735c745026bc091e4e95b87e68d0f93558367d8df5bb396188f1";
 
-function sql(stmt: string) {
-  // Collapse whitespace so the command stays on one line
+function sql(stmt: string, retries = 3) {
   const flat = stmt.replace(/\s+/g, " ").trim();
-  execSync(`npx wrangler d1 execute DB --local --command="${flat}"`, {
-    cwd: "apps/api",
-    stdio: "pipe",
-  });
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      execSync(`npx wrangler d1 execute DB --local --command="${flat}"`, {
+        cwd: "apps/api",
+        stdio: "pipe",
+      });
+      return;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      execSync("node -e \"setTimeout(() => {}, 300)\"");
+    }
+  }
 }
 
 export default async function globalSetup() {
+  // ── MUST run first: clear ALL rate-limit state from previous runs ────────
+  // security_events holds LOGIN_ATTEMPT rows used by checkLoginRateLimit()
+  // rate_limit_entries holds generic sliding-window counts used by rateLimiter middleware
+  try { sql(`DELETE FROM security_events WHERE event_type IN ('LOGIN_ATTEMPT','RATE_LIMIT_EXCEEDED')`); } catch { /* ignore */ }
+  try { sql(`DELETE FROM rate_limit_entries`); } catch { /* ignore if table doesn't exist */ }
+
   // ── Users ───────────────────────────────────────────────────────────────
   sql(`INSERT INTO users (id,email,password_hash,full_name,account_status,created_at,updated_at) VALUES ('TEST-MEMBER-01','member@bmsit.in','${H}','Test Member','ACTIVE',0,0) ON CONFLICT(email) DO UPDATE SET password_hash='${H}',account_status='ACTIVE'`);
   sql(`INSERT INTO users (id,email,password_hash,full_name,account_status,created_at,updated_at) VALUES ('TEST-SUSPENDED-01','suspended@bmsit.in','${H}','Test Suspended','SUSPENDED',0,0) ON CONFLICT(email) DO UPDATE SET password_hash='${H}',account_status='SUSPENDED'`);
@@ -28,15 +41,12 @@ export default async function globalSetup() {
   sql(`INSERT OR IGNORE INTO user_departments (user_id,department_id) VALUES ('USER-NORMAL-01','MARKETING')`);
 
   // ── Published event for public page test ────────────────────────────────
-  sql(`INSERT INTO events (event_id,title,short_description,full_description,category,venue,start_date,end_date,registration_status,event_status,capacity,registered_count,created_by,created_at,updated_at) VALUES ('EVENT-2026-001','GCC Global Opportunities Summit 2026','Flagship summit','Full description','TECH','BMSIT Auditorium','2026-09-15T09:00:00Z','2026-09-15T17:00:00Z','OPEN','PUBLISHED',500,0,'SYSTEM',0,0) ON CONFLICT(event_id) DO UPDATE SET event_status='PUBLISHED',registration_status='OPEN'`);
+  sql(`INSERT INTO events (event_id,title,short_description,full_description,category,venue,start_date,end_date,registration_status,event_status,capacity,registered_count,created_by,created_at,updated_at) VALUES ('EVENT-2026-001','GCC Global Opportunities Summit 2026','Flagship summit','Full description','TECH','BMSIT Auditorium','2026-09-15T09:00:00Z','2026-09-15T17:00:00Z','OPEN','PUBLISHED',500,0,'SYSTEM',0,0) ON CONFLICT(event_id) DO UPDATE SET title='GCC Global Opportunities Summit 2026',event_status='PUBLISHED',registration_status='OPEN',registered_count=0`);
 
   // ── Concurrency test events (clear stale registrations first) ───────────
   try { sql(`DELETE FROM event_registrations WHERE event_id IN ('EVENT-CAPACITY-001','EVENT-DUP-001')`); } catch { /* ignore */ }
   sql(`INSERT INTO events (event_id,title,short_description,full_description,category,venue,start_date,end_date,registration_status,event_status,capacity,registered_count,created_by,created_at,updated_at) VALUES ('EVENT-CAPACITY-001','Concurrency Event','Short','Full','TECH','Main','2026-09-01T10:00:00Z','2026-09-01T12:00:00Z','OPEN','PUBLISHED',1,0,'SYSTEM',0,0) ON CONFLICT(event_id) DO UPDATE SET capacity=1,registered_count=0,registration_status='OPEN'`);
   sql(`INSERT INTO events (event_id,title,short_description,full_description,category,venue,start_date,end_date,registration_status,event_status,capacity,registered_count,created_by,created_at,updated_at) VALUES ('EVENT-DUP-001','Duplicate Event','Short','Full','TECH','Main','2026-09-01T10:00:00Z','2026-09-01T12:00:00Z','OPEN','PUBLISHED',10,0,'SYSTEM',0,0) ON CONFLICT(event_id) DO UPDATE SET capacity=10,registered_count=0,registration_status='OPEN'`);
-
-  // ── Clear any leftover rate-limit state from previous runs ──────────────
-  try { sql(`DELETE FROM rate_limits`); } catch { /* table may not exist */ }
 
   console.log("[global-setup] Test database seeded successfully.");
 }

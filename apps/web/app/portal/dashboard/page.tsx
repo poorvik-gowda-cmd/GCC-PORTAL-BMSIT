@@ -2,7 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckSquare, AlertTriangle, CheckCircle2, Clock, ArrowRight, ShieldCheck, Loader2, ServerCrash } from "lucide-react";
+import {
+  CheckSquare,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  ShieldCheck,
+  Loader2,
+  ServerCrash,
+  UserCheck,
+  FolderGit2,
+  FileText,
+} from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +53,7 @@ const PRIORITY_VARIANT: Record<string, "destructive" | "secondary" | "warning"> 
 
 const STATUS_COLORS: Record<string, string> = {
   IN_PROGRESS: "text-amber-400",
-  OVERDUE: "text-rose-400",
+  OVERDUE: "text-rose-400 font-bold",
   COMPLETED: "text-emerald-400",
   NOT_STARTED: "text-slate-400",
 };
@@ -56,17 +68,14 @@ export default function PortalDashboardPage() {
   const [eventError, setEventError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get cached user from portal layout (already fetched via /auth/me)
-    // We re-fetch here to avoid prop drilling from layout
     apiGet<{ user: UserProfile }>("/api/v1/auth/me")
       .then((d) => setUser(d.user))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    // Fetch tasks
     apiGet<{ tasks: Task[] }>("/api/v1/tasks")
-      .then((d) => setTasks(d.tasks.slice(0, 5))) // Show 5 most recent
+      .then((d) => setTasks(d.tasks.slice(0, 5)))
       .catch((err) => {
         if (err instanceof ApiError && err.statusCode === 403) {
           setTaskError("No task access");
@@ -78,7 +87,6 @@ export default function PortalDashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Try events/all (requires EVENT_EDIT). Fall back to public events endpoint.
     apiGet<{ events: GccEvent[] }>("/api/v1/events/all")
       .then((d) => setEvents(d.events))
       .catch(() =>
@@ -89,38 +97,60 @@ export default function PortalDashboardPage() {
       .finally(() => setLoadingEvents(false));
   }, []);
 
-  // Compute stats
   const overdueTasks = tasks.filter((t) => t.status === "OVERDUE").length;
   const inProgressTasks = tasks.filter((t) => t.status === "IN_PROGRESS").length;
   const completedTasks = tasks.filter((t) => t.status === "COMPLETED").length;
   const publishedEvents = events.filter((e) => e.eventStatus === "PUBLISHED").length;
 
+  const isSuperAdmin = user?.roles.includes("SYSTEM_SUPER_ADMIN");
+  const isExecCouncil = user?.roles.includes("EXECUTIVE_COUNCIL");
+
   const stats = [
     { label: "Assigned Tasks", value: tasks.length.toString(), icon: CheckSquare, color: "text-blue-400" },
     { label: "In Progress", value: inProgressTasks.toString(), icon: Clock, color: "text-amber-400" },
-    { label: "Completed Tasks", value: completedTasks.toString(), icon: CheckCircle2, color: "text-emerald-400" },
-    { label: "Overdue Tasks", value: overdueTasks.toString(), icon: AlertTriangle, color: "text-rose-400" },
+    { label: "Overdue", value: overdueTasks.toString(), icon: AlertTriangle, color: overdueTasks > 0 ? "text-rose-400 font-bold" : "text-slate-400" },
+    { label: "Completed", value: completedTasks.toString(), icon: CheckCircle2, color: "text-emerald-400" },
   ];
 
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="glass-panel p-6 md:p-8 rounded-2xl border border-blue-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl glass-panel border-blue-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Badge variant="default" className="gap-1 mb-2">
-            <ShieldCheck className="w-3.5 h-3.5" /> GCC Member Portal
-          </Badge>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="default">{user?.roles?.[0] || "MEMBER"}</Badge>
+            <Badge variant="outline">{user?.departments?.[0] || "GENERAL"}</Badge>
+          </div>
+          <h1 className="text-2xl font-bold text-white">
             Welcome back, <span className="gradient-text">{user?.fullName || "GCC Member"}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Department: {user?.departments?.[0] || "—"} | Role: {user?.roles?.[0] || "—"}
+            {isSuperAdmin
+              ? "System Super Admin Command Hub — Full organization management, user onboarding, and security audit control."
+              : isExecCouncil
+              ? "Executive Council Leadership Desk — Overseeing all 6 departments, global tasks, and institutional MoUs."
+              : `Department Dashboard — Managing tasks and activities for ${user?.departments?.[0] || "your department"}.`}
           </p>
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex flex-wrap gap-2">
+          {isSuperAdmin && (
+            <Link href="/portal/system-admin">
+              <Button variant="gradient" size="sm" className="gap-1.5 text-xs">
+                <UserCheck className="w-4 h-4" /> System Admin Panel
+              </Button>
+            </Link>
+          )}
+          {isExecCouncil && !isSuperAdmin && (
+            <Link href="/portal/departments">
+              <Button variant="gradient" size="sm" className="gap-1.5 text-xs">
+                <FolderGit2 className="w-4 h-4" /> Oversee Departments
+              </Button>
+            </Link>
+          )}
           <Link href="/portal/tasks">
-            <Button variant="gradient" size="sm" className="gap-1.5 text-xs">
-              <CheckSquare className="w-4 h-4" /> View Tasks
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+              <CheckSquare className="w-4 h-4" /> View Task Tracker
             </Button>
           </Link>
         </div>
@@ -146,12 +176,14 @@ export default function PortalDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Tasks */}
+        {/* Active Tasks Card */}
         <Card className="glass-panel border-slate-800">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg text-white">Active Tasks</CardTitle>
-              <CardDescription className="text-xs">Your priority deliverables</CardDescription>
+              <CardTitle className="text-lg text-white">Active Deliverables</CardTitle>
+              <CardDescription className="text-xs">
+                {isExecCouncil || isSuperAdmin ? "Global tasks across all departments" : "Your priority deliverables"}
+              </CardDescription>
             </div>
             <Link href="/portal/tasks">
               <Button variant="outline" size="sm" className="text-xs gap-1">
@@ -169,11 +201,18 @@ export default function PortalDashboardPage() {
                 <ServerCrash className="w-4 h-4" /> {taskError}
               </div>
             ) : tasks.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">No tasks assigned to you yet.</p>
+              <p className="text-xs text-slate-400 py-6 text-center">No active tasks assigned yet.</p>
             ) : (
               <div className="space-y-3">
                 {tasks.map((t) => (
-                  <div key={t.taskId} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div
+                    key={t.taskId}
+                    className={`p-4 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      t.status === "OVERDUE"
+                        ? "bg-rose-950/30 border-rose-500/50"
+                        : "bg-slate-950/60 border-slate-800/80"
+                    }`}
+                  >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono text-blue-400">{t.taskId}</span>
@@ -192,7 +231,7 @@ export default function PortalDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Events Summary */}
+        {/* Events Overview Card */}
         <Card className="glass-panel border-slate-800">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>

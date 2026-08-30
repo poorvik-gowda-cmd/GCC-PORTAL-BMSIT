@@ -118,9 +118,15 @@ export default function QrManagerPage() {
                 </CardHeader>
 
                 <CardContent className="space-y-3">
-                  {/* QR Image Representation */}
-                  <div className="w-36 h-36 mx-auto rounded-xl bg-white p-3 flex items-center justify-center shadow-lg">
-                    <QrCode className="w-28 h-28 text-slate-950" />
+                  {/* Real Scannable QR Image */}
+                  <div className="w-40 h-40 mx-auto rounded-xl bg-white p-2.5 flex items-center justify-center shadow-lg border border-slate-200">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                        typeof window !== "undefined" ? `${window.location.origin}${targetUrl}` : targetUrl
+                      )}`}
+                      alt={`QR Code for ${evt.title}`}
+                      className="w-36 h-36 object-contain"
+                    />
                   </div>
 
                   <div className="flex gap-2">

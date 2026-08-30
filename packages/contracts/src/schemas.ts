@@ -1,4 +1,4 @@
-﻿// ==========================================================
+// ==========================================================
 // GCC Portal — Shared Zod Validation Schemas
 // packages/contracts/src/schemas.ts
 // ==========================================================
@@ -31,12 +31,12 @@ export type ResetPasswordRequest = z.infer<typeof ResetPasswordSchema>;
 export const TaskPrioritySchema = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
 export const TaskStatusSchema = z.enum(['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'OVERDUE']);
 export const DepartmentIdSchema = z.enum([
-  'EXECUTION_COUNCIL',
-  'RESEARCH_PUBLICATION',
+  'EXECUTIVE_COUNCIL',
+  'EVENTS_OPERATIONS',
+  'TECHNICAL',
   'MARKETING',
-  'DIGITAL_SYSTEMS',
-  'DESIGN_CREATIVE',
-  'PHOTOGRAPHY_MEDIA',
+  'DESIGN',
+  'PHOTOGRAPHY',
 ]);
 
 export const CreateTaskSchema = z.object({

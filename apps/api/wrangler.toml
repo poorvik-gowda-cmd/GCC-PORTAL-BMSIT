@@ -42,7 +42,7 @@ migrations_dir = "../../packages/database/migrations"
 # ── Production ──────────────────────────────────────────────────────────────
 [env.production.vars]
 APP_ENV                       = "production"
-ALLOWED_ORIGINS               = "https://gcc.bmsit.ac.in"
+ALLOWED_ORIGINS               = "https://gcc-portal-bmsit-frontend.vercel.app"
 GOOGLE_SHEETS_SPREADSHEET_ID  = "1_FZpVwncW3mNOrwp62T4uoIwkBeXYb6ge1BXgARcafM"
 GOOGLE_DRIVE_ROOT_FOLDER_ID   = "1LafIbcge-2_pTd2KROcZ_X6wn9c_j9UT"
 

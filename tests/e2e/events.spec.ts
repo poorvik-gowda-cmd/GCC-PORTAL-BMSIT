@@ -5,11 +5,12 @@ import { test, expect } from "@playwright/test";
 test.describe("Event Registration & Bot Guard E2E Suite", () => {
   test("should display published events on public page", async ({ page }) => {
     await page.goto("/events");
-    await expect(page.locator("text=GCC Global Opportunities Summit 2026")).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("text=GCC Global Opportunities Summit 2026")).toBeVisible({ timeout: 15000 });
   });
 
   test("should reject event registration with invalid turnstile token", async ({ request }) => {
-    const response = await request.post("http://localhost:8787/api/v1/events/EVENT-2026-001/register", {
+    const response = await request.post("http://127.0.0.1:8787/api/v1/events/EVENT-2026-001/register", {
       data: {
         turnstileToken: "invalid_token",
         fullName: "Test User",
@@ -25,7 +26,7 @@ test.describe("Event Registration & Bot Guard E2E Suite", () => {
   test.describe("Concurrency Tests", () => {
     // Concurrency events seeded by global-setup.ts — no wrangler CLI here.
     test("should handle concurrent capacity registrations correctly", async ({ request }) => {
-      const req1 = request.post("http://localhost:8787/api/v1/events/EVENT-CAPACITY-001/register", {
+      const req1 = request.post("http://127.0.0.1:8787/api/v1/events/EVENT-CAPACITY-001/register", {
         data: {
           turnstileToken: "1x0000000000000000000000000000000AA",
           fullName: "User One",
@@ -34,7 +35,7 @@ test.describe("Event Registration & Bot Guard E2E Suite", () => {
         },
       });
       
-      const req2 = request.post("http://localhost:8787/api/v1/events/EVENT-CAPACITY-001/register", {
+      const req2 = request.post("http://127.0.0.1:8787/api/v1/events/EVENT-CAPACITY-001/register", {
         data: {
           turnstileToken: "1x0000000000000000000000000000000AA",
           fullName: "User Two",
@@ -51,7 +52,7 @@ test.describe("Event Registration & Bot Guard E2E Suite", () => {
     });
 
     test("should handle concurrent duplicate registrations correctly", async ({ request }) => {
-      const req1 = request.post("http://localhost:8787/api/v1/events/EVENT-DUP-001/register", {
+      const req1 = request.post("http://127.0.0.1:8787/api/v1/events/EVENT-DUP-001/register", {
         data: {
           turnstileToken: "1x0000000000000000000000000000000AA",
           fullName: "Test Duplicate",
@@ -60,7 +61,7 @@ test.describe("Event Registration & Bot Guard E2E Suite", () => {
         },
       });
       
-      const req2 = request.post("http://localhost:8787/api/v1/events/EVENT-DUP-001/register", {
+      const req2 = request.post("http://127.0.0.1:8787/api/v1/events/EVENT-DUP-001/register", {
         data: {
           turnstileToken: "1x0000000000000000000000000000000AA",
           fullName: "Test Duplicate",

@@ -45,9 +45,10 @@ export async function loginUser(
   email: string,
   password: string,
   ip: string,
-  userAgent: string
+  userAgent: string,
+  appEnv?: string
 ): Promise<LoginResponse> {
-  const { allowed } = await checkLoginRateLimit(db, ip);
+  const { allowed } = await checkLoginRateLimit(db, ip, appEnv);
   if (!allowed) {
     return { success: false, error: 'RATE_LIMITED' };
   }

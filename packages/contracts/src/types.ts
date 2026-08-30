@@ -1,4 +1,4 @@
-﻿// ==========================================================
+// ==========================================================
 // GCC Portal — Shared Enums and Domain Types
 // packages/contracts/src/types.ts
 // ==========================================================
@@ -20,12 +20,12 @@ export const RoleId = {
 export type RoleId = (typeof RoleId)[keyof typeof RoleId];
 
 export const DepartmentId = {
-  EXECUTION_COUNCIL: 'EXECUTION_COUNCIL',
-  RESEARCH_PUBLICATION: 'RESEARCH_PUBLICATION',
+  EXECUTIVE_COUNCIL: 'EXECUTIVE_COUNCIL',
+  EVENTS_OPERATIONS: 'EVENTS_OPERATIONS',
+  TECHNICAL: 'TECHNICAL',
   MARKETING: 'MARKETING',
-  DIGITAL_SYSTEMS: 'DIGITAL_SYSTEMS',
-  DESIGN_CREATIVE: 'DESIGN_CREATIVE',
-  PHOTOGRAPHY_MEDIA: 'PHOTOGRAPHY_MEDIA',
+  DESIGN: 'DESIGN',
+  PHOTOGRAPHY: 'PHOTOGRAPHY',
 } as const;
 export type DepartmentId = (typeof DepartmentId)[keyof typeof DepartmentId];
 

@@ -30,7 +30,7 @@ authRouter.post('/login', zValidator('json', LoginRequestSchema), async (c) => {
   const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'unknown';
   const userAgent = c.req.header('User-Agent') ?? '';
 
-  const result = await loginUser(c.env.DB, email, password, ip, userAgent);
+  const result = await loginUser(c.env.DB, email, password, ip, userAgent, c.env.APP_ENV);
 
   if ('requiresMfa' in result && result.requiresMfa) {
     return c.json({ success: true, data: { requiresMfa: true, mfaSessionToken: result.mfaSessionToken } });

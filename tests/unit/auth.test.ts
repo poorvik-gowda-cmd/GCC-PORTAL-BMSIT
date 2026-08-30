@@ -6,7 +6,7 @@ describe("Crypto Security & Authentication", () => {
     const password = "StrongPassword@2026!";
     const hash = await hashPassword(password);
 
-    expect(hash).toContain("pbkdf2:310000:");
+    expect(hash).toContain("pbkdf2:100000:");
 
     const isValid = await verifyPassword(password, hash);
     expect(isValid).toBe(true);

@@ -19,7 +19,7 @@ describe("RBAC Permissions & Department Isolation", () => {
     fullName: "Executive Chair",
     accountStatus: "ACTIVE",
     roles: ["EXECUTIVE_COUNCIL"],
-    departments: ["EXECUTION_COUNCIL"],
+    departments: ["EXECUTIVE_COUNCIL"],
     permissions: ["TASK_ASSIGN_GLOBAL", "TASK_VIEW_GLOBAL", "TASK_REMARK"],
   };
 
@@ -35,14 +35,14 @@ describe("RBAC Permissions & Department Isolation", () => {
 
   it("should prevent Department Member from accessing unrelated department resources", () => {
     expect(canAccessDepartment(memberUser, "MARKETING")).toBe(true);
-    expect(canAccessDepartment(memberUser, "RESEARCH_PUBLICATION")).toBe(false);
+    expect(canAccessDepartment(memberUser, "TECHNICAL")).toBe(false);
   });
 
   it("should allow Executive Council and Super Admin to access all departments", () => {
     expect(canAccessDepartment(execUser, "MARKETING")).toBe(true);
-    expect(canAccessDepartment(execUser, "RESEARCH_PUBLICATION")).toBe(true);
+    expect(canAccessDepartment(execUser, "TECHNICAL")).toBe(true);
     expect(canAccessDepartment(superAdminUser, "MARKETING")).toBe(true);
-    expect(canAccessDepartment(superAdminUser, "RESEARCH_PUBLICATION")).toBe(true);
+    expect(canAccessDepartment(superAdminUser, "TECHNICAL")).toBe(true);
   });
 
   it("should enforce task update IDOR restrictions", () => {

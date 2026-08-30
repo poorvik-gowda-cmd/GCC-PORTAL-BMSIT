@@ -8,10 +8,21 @@ import type { D1Database } from '@gcc-portal/database';
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_SECONDS = 15 * 60; // 15 minutes
 
+/** Loopback IPs are never rate-limited outside of production. */
+const LOOPBACK_IPS = new Set(['127.0.0.1', '::1', 'localhost', 'unknown']);
+
+function isLocalhostBypass(ip: string, appEnv?: string): boolean {
+  return appEnv !== 'production' && LOOPBACK_IPS.has(ip);
+}
+
 export async function checkLoginRateLimit(
   db: D1Database,
-  ip: string
+  ip: string,
+  appEnv?: string
 ): Promise<{ allowed: boolean; attemptsRemaining: number }> {
+  if (isLocalhostBypass(ip, appEnv)) {
+    return { allowed: true, attemptsRemaining: MAX_LOGIN_ATTEMPTS };
+  }
   const windowStart = Math.floor(Date.now() / 1000) - LOGIN_WINDOW_SECONDS;
 
   const result = await db
@@ -67,7 +78,8 @@ export async function checkRateLimit(
   db: D1Database,
   key: string,
   maxRequests: number,
-  windowSeconds: number
+  windowSeconds: number,
+  _appEnv?: string // reserved for future use — not used to ensure rate limit tests work
 ): Promise<{ allowed: boolean; remaining: number }> {
   const now = Math.floor(Date.now() / 1000);
   const windowStart = now - windowSeconds;

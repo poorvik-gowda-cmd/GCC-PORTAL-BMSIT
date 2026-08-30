@@ -52,13 +52,24 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     router.replace("/portal/login");
   };
 
+  const isLeadership = user?.roles.some((r) => r === "SYSTEM_SUPER_ADMIN" || r === "EXECUTIVE_COUNCIL");
+  const deptHref = isLeadership
+    ? "/portal/departments"
+    : user?.departments?.[0]
+    ? `/portal/departments/${user.departments[0]}`
+    : "/portal/departments";
+
   const navItems = [
     { href: "/portal/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/portal/tasks", label: "Task Tracker", icon: CheckSquare },
     { href: "/portal/events", label: "Event Desk", icon: Calendar },
-    { href: "/portal/departments/DIGITAL_SYSTEMS", label: "Department Desks", icon: FolderGit2 },
+    { href: deptHref, label: "Department Desks", icon: FolderGit2 },
     { href: "/portal/qr", label: "QR Manager", icon: QrCode },
   ];
+
+  if (user?.roles.includes("SYSTEM_SUPER_ADMIN")) {
+    navItems.push({ href: "/portal/system-admin", label: "System Admin", icon: User });
+  }
 
   // Show spinner while session check is in-flight (avoids flash of unauthenticated content)
   if (!authChecked) {

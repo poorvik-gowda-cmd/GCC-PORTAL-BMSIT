@@ -1,16 +1,16 @@
-﻿-- ==========================================================
+-- ==========================================================
 -- GCC Portal - D1 Seed: Roles, Departments, Permissions
 -- Migration 002: Reference Data
 -- ==========================================================
 
 -- Departments
 INSERT OR IGNORE INTO departments (id, name, description) VALUES
-  ('EXECUTION_COUNCIL',   'Execution Council',    'Core leadership and operations coordination'),
-  ('RESEARCH_PUBLICATION','Research & Publication','Academic research, papers, and publications'),
-  ('MARKETING',           'Marketing',            'Brand communication and outreach'),
-  ('DIGITAL_SYSTEMS',     'Digital Systems',      'Event tech, QR systems, digital operations'),
-  ('DESIGN_CREATIVE',     'Design & Creative',    'Visual design and creative assets'),
-  ('PHOTOGRAPHY_MEDIA',   'Photography & Media',  'Photography, videography, and media archive');
+  ('EXECUTIVE_COUNCIL', 'Executive Council', 'Core leadership and operations coordination'),
+  ('EVENTS_OPERATIONS', 'Events & Operations', 'Event planning, registration management, and logistics'),
+  ('TECHNICAL',         'Technical',         'Event tech, QR systems, digital operations'),
+  ('MARKETING',         'Marketing',         'Brand communication and outreach'),
+  ('DESIGN',            'Design',            'Visual design and creative assets'),
+  ('PHOTOGRAPHY',       'Photography',       'Photography, videography, and media archive');
 
 -- Roles
 INSERT OR IGNORE INTO roles (id, name) VALUES

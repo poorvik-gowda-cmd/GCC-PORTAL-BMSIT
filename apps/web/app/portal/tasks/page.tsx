@@ -26,6 +26,7 @@ export default function TaskTrackerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [canAssignTask, setCanAssignTask] = useState(false);
 
   const [selectedDeptFilter, setSelectedDeptFilter] = useState("ALL");
   const [remarkInput, setRemarkInput] = useState<{ [key: string]: string }>({});
@@ -37,11 +38,25 @@ export default function TaskTrackerPage() {
   const [createForm, setCreateForm] = useState({
     title: "",
     description: "",
-    department: "EXECUTION_COUNCIL" as DepartmentId,
+    department: "EXECUTIVE_COUNCIL" as DepartmentId,
     assignedTo: "",
     deadline: "",
     priority: "MEDIUM" as TaskPriority,
   });
+
+  useEffect(() => {
+    apiGet<{ user: { roles: string[]; permissions: string[] } }>("/api/v1/auth/me")
+      .then((d) => {
+        const u = d.user;
+        const allowed =
+          u.permissions?.includes("TASK_ASSIGN_GLOBAL") ||
+          u.permissions?.includes("TASK_ASSIGN_DEPARTMENT") ||
+          u.roles?.includes("SYSTEM_SUPER_ADMIN") ||
+          u.roles?.includes("EXECUTIVE_COUNCIL");
+        setCanAssignTask(allowed);
+      })
+      .catch(() => {});
+  }, []);
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -154,7 +169,7 @@ export default function TaskTrackerPage() {
       setCreateForm({
         title: "",
         description: "",
-        department: "EXECUTION_COUNCIL",
+        department: "EXECUTIVE_COUNCIL",
         assignedTo: "",
         deadline: "",
         priority: "MEDIUM",
@@ -200,9 +215,11 @@ export default function TaskTrackerPage() {
           </p>
         </div>
 
-        <Button variant="gradient" size="sm" onClick={() => setShowCreateModal(true)} className="gap-1.5 text-xs">
-          <Plus className="w-4 h-4" /> Assign New Task
-        </Button>
+        {canAssignTask && (
+          <Button variant="gradient" size="sm" onClick={() => setShowCreateModal(true)} className="gap-1.5 text-xs">
+            <Plus className="w-4 h-4" /> Assign New Task
+          </Button>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -212,12 +229,12 @@ export default function TaskTrackerPage() {
         </span>
         {[
           "ALL",
-          "EXECUTION_COUNCIL",
-          "DIGITAL_SYSTEMS",
-          "RESEARCH_PUBLICATION",
+          "EXECUTIVE_COUNCIL",
+          "EVENTS_OPERATIONS",
+          "TECHNICAL",
           "MARKETING",
-          "DESIGN_CREATIVE",
-          "PHOTOGRAPHY_MEDIA",
+          "DESIGN",
+          "PHOTOGRAPHY",
         ].map((dept) => (
           <button
             key={dept}
@@ -425,12 +442,12 @@ export default function TaskTrackerPage() {
                       onChange={(e) => setCreateForm({ ...createForm, department: e.target.value as DepartmentId })}
                       className="w-full h-10 px-3 rounded-lg bg-slate-950/60 border border-slate-700/80 text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
-                      <option value="EXECUTION_COUNCIL">Execution Council</option>
-                      <option value="DIGITAL_SYSTEMS">Digital Systems</option>
-                      <option value="RESEARCH_PUBLICATION">Research & Pubs</option>
+                      <option value="EXECUTIVE_COUNCIL">Executive Council</option>
+                      <option value="EVENTS_OPERATIONS">Events & Operations</option>
+                      <option value="TECHNICAL">Technical</option>
                       <option value="MARKETING">Marketing</option>
-                      <option value="DESIGN_CREATIVE">Design & Creative</option>
-                      <option value="PHOTOGRAPHY_MEDIA">Photography & Media</option>
+                      <option value="DESIGN">Design</option>
+                      <option value="PHOTOGRAPHY">Photography</option>
                     </select>
                   </div>
                   <div className="space-y-1">

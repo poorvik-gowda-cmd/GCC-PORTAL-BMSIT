@@ -24,7 +24,7 @@ test.describe("Authentication E2E Suite", () => {
   });
 
   test("should reject suspended account login", async ({ request }) => {
-    const response = await request.post("http://localhost:8787/api/v1/auth/login", {
+    const response = await request.post("http://127.0.0.1:8787/api/v1/auth/login", {
       data: { email: "suspended@bmsit.in", password: "Password123!" },
     });
     expect(response.status()).toBe(403);
@@ -33,7 +33,7 @@ test.describe("Authentication E2E Suite", () => {
   });
 
   test("should reject revoked account login", async ({ request }) => {
-    const response = await request.post("http://localhost:8787/api/v1/auth/login", {
+    const response = await request.post("http://127.0.0.1:8787/api/v1/auth/login", {
       data: { email: "revoked@bmsit.in", password: "Password123!" },
     });
     expect(response.status()).toBe(403);
@@ -49,7 +49,7 @@ test.describe("Authentication E2E Suite", () => {
       const statuses: number[] = [];
 
       for (let i = 0; i < 6; i++) {
-        const res = await request.post("http://localhost:8787/api/v1/auth/mfa/verify", {
+        const res = await request.post("http://127.0.0.1:8787/api/v1/auth/mfa/verify", {
           data: badPayload,
         });
         statuses.push(res.status());
@@ -66,7 +66,7 @@ test.describe("Authentication E2E Suite", () => {
       const statuses: number[] = [];
 
       for (let i = 0; i < 6; i++) {
-        const res = await request.post("http://localhost:8787/api/v1/auth/reset-password", {
+        const res = await request.post("http://127.0.0.1:8787/api/v1/auth/reset-password", {
           data: badPayload,
         });
         statuses.push(res.status());
@@ -77,7 +77,7 @@ test.describe("Authentication E2E Suite", () => {
     });
 
     test("forgot-password should always return generic success (no account enumeration)", async ({ request }) => {
-      const res = await request.post("http://localhost:8787/api/v1/auth/forgot-password", {
+      const res = await request.post("http://127.0.0.1:8787/api/v1/auth/forgot-password", {
         data: { email: "definitelydoesnotexist12345@bmsit.in" },
       });
       expect(res.status()).toBe(200);

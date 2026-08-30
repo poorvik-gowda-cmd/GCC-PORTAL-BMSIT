@@ -16,7 +16,7 @@ export function rateLimiter(
     const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'unknown';
     const key = `${keyPrefix}:${ip}`;
 
-    const { allowed, remaining } = await checkRateLimit(c.env.DB, key, maxRequests, windowSeconds);
+    const { allowed, remaining } = await checkRateLimit(c.env.DB, key, maxRequests, windowSeconds, c.env.APP_ENV);
 
     c.header('X-RateLimit-Limit', maxRequests.toString());
     c.header('X-RateLimit-Remaining', remaining.toString());
