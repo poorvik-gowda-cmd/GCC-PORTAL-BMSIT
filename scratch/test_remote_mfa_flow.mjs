@@ -20,13 +20,13 @@ async function testMfaFlow() {
 
   const mfaToken = loginData.data.mfaSessionToken;
 
-  console.log("\n--- STEP 2: POST /mfa/verify (using Recovery Code RECOVERY-001) ---");
+  console.log("\n--- STEP 2: POST /mfa/verify (using Recovery Code RECOVERY-003) ---");
   const verifyResp = await fetch("https://gcc-portal-api-production.gcc-portal.workers.dev/api/v1/auth/mfa/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       mfaSessionToken: mfaToken,
-      recoveryCode: "RECOVERY-001",
+      recoveryCode: "RECOVERY-003",
     }),
   });
 

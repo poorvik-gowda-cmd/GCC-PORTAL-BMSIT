@@ -21,7 +21,7 @@ export const corsAndHeaders = createMiddleware<{ Bindings: Env }>(async (c, next
     c.header('Access-Control-Allow-Origin', origin || '*');
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-    c.header('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,X-CSRF-Token');
+    c.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Session-Token,X-Requested-With,X-CSRF-Token');
   }
 
   // Preflight request handler
