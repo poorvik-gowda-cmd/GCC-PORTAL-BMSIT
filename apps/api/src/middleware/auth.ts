@@ -81,3 +81,31 @@ export function requirePermission(permission: Permission) {
     await next();
   });
 }
+
+export function requireAnyPermission(...permissions: Permission[]) {
+  return createMiddleware<{ Bindings: Env; Variables: AuthVariables }>(async (c, next) => {
+    const user = c.get('user');
+    if (!user) {
+      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, 401);
+    }
+
+    const hasPermission = permissions.some((p) => user.permissions.includes(p));
+    if (!hasPermission) {
+      const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? '';
+      await auditLog(
+        c.env.DB,
+        user.id,
+        'PERMISSION_DENIED',
+        { permissions, path: c.req.path },
+        ip,
+        c.req.header('User-Agent') ?? ''
+      );
+      return c.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to perform this action' } },
+        403
+      );
+    }
+
+    await next();
+  });
+}

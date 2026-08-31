@@ -32,8 +32,16 @@ interface CreateEventPayload {
   capacity?: number;
 }
 
+interface UserProfile {
+  id: string;
+  roles: string[];
+  departments: string[];
+  permissions: string[];
+}
+
 export default function PortalEventsPage() {
   const [events, setEvents] = useState<GccEvent[]>([]);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [forbidden, setForbidden] = useState(false);
@@ -43,6 +51,19 @@ export default function PortalEventsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  const canCreateEvents =
+    user?.permissions?.includes("EVENT_CREATE") ||
+    user?.roles?.includes("EXECUTIVE_COUNCIL") ||
+    user?.roles?.includes("SYSTEM_SUPER_ADMIN") ||
+    user?.departments?.includes("TECHNICAL");
+
+  const canManageEvents =
+    user?.permissions?.includes("EVENT_EDIT") ||
+    user?.permissions?.includes("EVENT_PUBLISH") ||
+    user?.roles?.includes("EXECUTIVE_COUNCIL") ||
+    user?.roles?.includes("SYSTEM_SUPER_ADMIN") ||
+    user?.departments?.includes("TECHNICAL");
 
   const [form, setForm] = useState<CreateEventPayload>({
     title: "",
@@ -69,7 +90,7 @@ export default function PortalEventsPage() {
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 403) {
         setForbidden(true);
-        setError("You do not have permission to manage events (requires EVENT_EDIT).");
+        setError("You do not have permission to manage events.");
       } else if (err instanceof ApiError && err.statusCode === 401) {
         setError("Session expired. Please log in again.");
       } else {
@@ -84,15 +105,20 @@ export default function PortalEventsPage() {
     let active = true;
     (async () => {
       try {
-        const data = await apiGet<{ events: GccEvent[] }>("/api/v1/events/all");
+        const [userData, eventsData] = await Promise.all([
+          apiGet<{ user: UserProfile }>("/api/v1/auth/me").catch(() => null),
+          apiGet<{ events: GccEvent[] }>("/api/v1/events/all"),
+        ]);
+
         if (active) {
-          setEvents(data.events);
+          if (userData?.user) setUser(userData.user);
+          setEvents(eventsData.events);
         }
       } catch (err) {
         if (active) {
           if (err instanceof ApiError && err.statusCode === 403) {
             setForbidden(true);
-            setError("You do not have permission to manage events (requires EVENT_EDIT).");
+            setError("You do not have permission to access events.");
           } else if (err instanceof ApiError && err.statusCode === 401) {
             setError("Session expired. Please log in again.");
           } else {
@@ -147,6 +173,8 @@ export default function PortalEventsPage() {
     try {
       const payload = {
         ...form,
+        startDate: form.startDate.includes('T') ? form.startDate : new Date(`${form.startDate}T00:00:00`).toISOString(),
+        endDate: form.endDate.includes('T') ? form.endDate : new Date(`${form.endDate}T23:59:59`).toISOString(),
         capacity: form.capacity && form.capacity > 0 ? form.capacity : undefined,
       };
       const data = await apiPost<{ eventId: string }>("/api/v1/events", payload);
@@ -183,7 +211,7 @@ export default function PortalEventsPage() {
             Create, configure, and publish official GCC events.
           </p>
         </div>
-        {!forbidden && (
+        {canCreateEvents && (
           <Button variant="gradient" size="sm" className="gap-1.5 text-xs" onClick={() => setShowCreate(true)}>
             <Plus className="w-4 h-4" /> Create New Event
           </Button>
@@ -263,11 +291,11 @@ export default function PortalEventsPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-300">Start Date *</label>
-                    <Input type="datetime-local" required value={form.startDate} onChange={(e) => setForm({ ...form, startDate: new Date(e.target.value).toISOString() })} className="text-xs" />
+                    <Input type="date" required value={form.startDate ? form.startDate.split('T')[0] : ""} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="text-xs text-white" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-300">End Date *</label>
-                    <Input type="datetime-local" required value={form.endDate} onChange={(e) => setForm({ ...form, endDate: new Date(e.target.value).toISOString() })} className="text-xs" />
+                    <Input type="date" required value={form.endDate ? form.endDate.split('T')[0] : ""} onChange={(e) => setForm({ ...form, endDate: e.target.value })} className="text-xs text-white" />
                   </div>
                 </div>
 
@@ -331,38 +359,40 @@ export default function PortalEventsPage() {
               </CardHeader>
 
               <CardContent className="pt-0 space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant={evt.eventStatus === "PUBLISHED" ? "outline" : "gradient"}
-                    size="sm"
-                    onClick={() => handlePublishToggle(evt)}
-                    disabled={publishingId === evt.eventId}
-                    className="w-full text-xs"
-                  >
-                    {publishingId === evt.eventId ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : evt.eventStatus === "PUBLISHED" ? (
-                      "Set Draft"
-                    ) : (
-                      "Publish"
-                    )}
-                  </Button>
-                  <Button
-                    variant={evt.registrationStatus === "OPEN" ? "destructive" : "gradient"}
-                    size="sm"
-                    onClick={() => handleRegToggle(evt)}
-                    disabled={togglingRegId === evt.eventId}
-                    className="w-full text-xs"
-                  >
-                    {togglingRegId === evt.eventId ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : evt.registrationStatus === "OPEN" ? (
-                      "Close Reg"
-                    ) : (
-                      "Open Reg"
-                    )}
-                  </Button>
-                </div>
+                {canManageEvents && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={evt.eventStatus === "PUBLISHED" ? "outline" : "gradient"}
+                      size="sm"
+                      onClick={() => handlePublishToggle(evt)}
+                      disabled={publishingId === evt.eventId}
+                      className="w-full text-xs"
+                    >
+                      {publishingId === evt.eventId ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : evt.eventStatus === "PUBLISHED" ? (
+                        "Set Draft"
+                      ) : (
+                        "Publish"
+                      )}
+                    </Button>
+                    <Button
+                      variant={evt.registrationStatus === "OPEN" ? "destructive" : "gradient"}
+                      size="sm"
+                      onClick={() => handleRegToggle(evt)}
+                      disabled={togglingRegId === evt.eventId}
+                      className="w-full text-xs"
+                    >
+                      {togglingRegId === evt.eventId ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : evt.registrationStatus === "OPEN" ? (
+                        "Close Reg"
+                      ) : (
+                        "Open Reg"
+                      )}
+                    </Button>
+                  </div>
+                )}
                 <Link href={`/portal/events/${evt.eventId}/registrations`} className="block">
                   <Button variant="secondary" size="sm" className="w-full text-xs gap-1.5">
                     <Eye className="w-3.5 h-3.5" /> View Registrations

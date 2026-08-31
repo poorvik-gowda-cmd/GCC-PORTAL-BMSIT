@@ -8,7 +8,7 @@ import { zValidator } from '@hono/zod-validator';
 import type { z } from 'zod';
 import type { Env } from '../types/env';
 import type { AuthVariables } from '../middleware/auth';
-import { requireAuth, requirePermission } from '../middleware/auth';
+import { requireAuth, requirePermission, requireAnyPermission } from '../middleware/auth';
 import { validateSession } from '../services/authService';
 import { auditLog } from '../services/auditService';
 import { verifyTurnstileToken } from '../security/turnstile';
@@ -81,7 +81,7 @@ eventsRouter.get('/', async (c) => {
 });
 
 // GET /api/v1/events/all — Management listing of all events
-eventsRouter.get('/all', requireAuth, requirePermission('EVENT_EDIT'), async (c) => {
+eventsRouter.get('/all', requireAuth, requireAnyPermission('EVENT_EDIT', 'EVENT_CREATE', 'REGISTRATION_VIEW', 'QR_GENERATE'), async (c) => {
   const result = await c.env.DB
     .prepare('SELECT * FROM events ORDER BY created_at DESC')
     .all<DbEvent>();
@@ -224,7 +224,7 @@ eventsRouter.post('/:id/publish', requireAuth, requirePermission('EVENT_PUBLISH'
 });
 
 // POST /api/v1/events/:id/registration-status — Toggle registration open/closed
-eventsRouter.post('/:id/registration-status', requireAuth, requirePermission('EVENT_EDIT'), async (c) => {
+eventsRouter.post('/:id/registration-status', requireAuth, requireAnyPermission('EVENT_EDIT', 'EVENT_CREATE', 'EVENT_PUBLISH'), async (c) => {
   const user = c.get('user');
   const eventId = c.req.param('id');
   const ip = c.req.header('CF-Connecting-IP') ?? '';

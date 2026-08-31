@@ -180,6 +180,58 @@ async function loadUserProfile(db: D1Database, user: DbUser): Promise<UserProfil
     permissions = permsResult.results.map((p: { permission_id: string }) => p.permission_id as Permission);
   }
 
+  // Department-specific permission adjustments based on GCC Portal governance rules:
+
+  // 1. TECHNICAL Department: Full technical event management access
+  if (departments.includes('TECHNICAL')) {
+    const techPerms: Permission[] = [
+      'EVENT_CREATE',
+      'EVENT_EDIT',
+      'EVENT_PUBLISH',
+      'REGISTRATION_VIEW',
+      'REGISTRATION_EXPORT',
+      'QR_GENERATE',
+      'TASK_VIEW_DEPARTMENT',
+      'TASK_UPDATE_OWN',
+    ];
+    for (const p of techPerms) {
+      if (!permissions.includes(p)) permissions.push(p);
+    }
+  }
+
+  // 2. EVENTS_OPERATIONS Department: View registered candidates, attendance, and feedback forms.
+  // NO event creation, editing, or publishing access.
+  if (departments.includes('EVENTS_OPERATIONS') && !roles.includes('EXECUTIVE_COUNCIL') && !roles.includes('SYSTEM_SUPER_ADMIN')) {
+    const opsPerms: Permission[] = [
+      'REGISTRATION_VIEW',
+      'REGISTRATION_EXPORT',
+      'ATTENDANCE_MANAGE',
+      'FEEDBACK_VIEW',
+      'TASK_VIEW_DEPARTMENT',
+      'TASK_UPDATE_OWN',
+    ];
+    for (const p of opsPerms) {
+      if (!permissions.includes(p)) permissions.push(p);
+    }
+    // Explicitly strip event creation and modification rights
+    permissions = permissions.filter((p) => !['EVENT_CREATE', 'EVENT_EDIT', 'EVENT_PUBLISH'].includes(p));
+  }
+
+  // 3. MARKETING Department: View upcoming events and generate/download QR codes for marketing.
+  // NO event creation, editing, or publishing access.
+  if (departments.includes('MARKETING') && !roles.includes('EXECUTIVE_COUNCIL') && !roles.includes('SYSTEM_SUPER_ADMIN')) {
+    const mktPerms: Permission[] = [
+      'QR_GENERATE',
+      'TASK_VIEW_DEPARTMENT',
+      'TASK_UPDATE_OWN',
+    ];
+    for (const p of mktPerms) {
+      if (!permissions.includes(p)) permissions.push(p);
+    }
+    // Explicitly strip event creation and modification rights
+    permissions = permissions.filter((p) => !['EVENT_CREATE', 'EVENT_EDIT', 'EVENT_PUBLISH'].includes(p));
+  }
+
   return {
     id: user.id,
     email: user.email,

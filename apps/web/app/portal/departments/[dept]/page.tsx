@@ -241,28 +241,35 @@ export default function DepartmentDeskPage() {
           <Card className="glass-panel border-blue-500/30">
             <CardHeader>
               <CardTitle className="text-base text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-400" /> Event Management Shortcuts & Responses
+                <Calendar className="w-5 h-5 text-blue-400" /> Event Candidate Registrations & Attendance Tools
               </CardTitle>
               <CardDescription className="text-xs">
-                Operational tools for event logistics, registrations, and feedback.
+                Operational tools for registered participant rosters, attendance check-in forms, and feedback collection.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Link href="/portal/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
+              <Link href="/portal/registrations" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Event Registration Responses & CSV Export</h4>
-                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">LIVE DATA</Badge>
+                  <h4 className="text-xs font-semibold text-white">Event Candidate Registrations Hub & CSV Export</h4>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">CANDIDATE DATA</Badge>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">View real-time event signups, participant capacity, and export rosters.</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">View live registered candidates for all events, monitor capacity, and export CSV rosters.</p>
               </Link>
 
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+              <a
+                href="https://forms.google.com"
+                target="_blank"
+                rel="noreferrer"
+                className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors group cursor-pointer"
+              >
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Attendance Check-In & Feedback Links</h4>
-                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">OPERATIONAL</Badge>
+                  <h4 className="text-xs font-semibold text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                    Google Forms Generator (Attendance & Feedback) <ExternalLink className="w-3 h-3 text-slate-500" />
+                  </h4>
+                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">FORMS TOOL</Badge>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">QR check-in scanners and post-event survey collection links.</p>
-              </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Generate and manage official Google Forms solely for event attendance check-in and participant feedback surveys.</p>
+              </a>
             </CardContent>
           </Card>
 
@@ -278,7 +285,11 @@ export default function DepartmentDeskPage() {
               </div>
               <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
                 <span>Participant Check-In Systems</span>
-                <span className="font-semibold text-emerald-400">QR Ready</span>
+                <span className="font-semibold text-emerald-400">Forms & QR Ready</span>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+                <span>Event Creation Access</span>
+                <span className="font-semibold text-slate-400">Technical & EC Only</span>
               </div>
             </CardContent>
           </Card>
@@ -301,9 +312,9 @@ export default function DepartmentDeskPage() {
               <Link href="/portal/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-colors">
                 <div className="flex justify-between items-center">
                   <h4 className="text-xs font-semibold text-white">Event Registration & Creation Desk</h4>
-                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">EVENT EDIT</Badge>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">FULL ACCESS</Badge>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Manage events, open/close registrations, view participants list, and edit details.</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Create new events, toggle draft/published, open/close registrations, and edit details.</p>
               </Link>
 
               <Link href="/portal/qr" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-colors">
@@ -360,28 +371,36 @@ export default function DepartmentDeskPage() {
           <Card className="glass-panel border-emerald-500/30">
             <CardHeader>
               <CardTitle className="text-base text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-400" /> Campaign Schedules & Registration Links
+                <Users className="w-5 h-5 text-emerald-400" /> Campaign Schedules, Event QR Codes & Links
               </CardTitle>
               <CardDescription className="text-xs">
-                Social media outreach and promotional tasks.
+                Access upcoming event QR codes, registration links, and promotional campaign materials.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Link href="/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
+              <Link href="/portal/qr" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Public Event Registration Links</h4>
-                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">PROMOTIONAL</Badge>
+                  <h4 className="text-xs font-semibold text-white">Event QR Code Registry & Download</h4>
+                  <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">QR CODES</Badge>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Copy official links for Instagram, LinkedIn, and poster QR integration.</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">View and download high-resolution QR code PNGs for marketing posters and social media.</p>
               </Link>
 
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+              <Link href="/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Outreach & Campaign Schedule</h4>
-                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">SCHEDULE</Badge>
+                  <h4 className="text-xs font-semibold text-white">Public Scheduled Events Calendar</h4>
+                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">UPCOMING</Badge>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Coordinate post release timelines and college announcement broadcasts.</p>
-              </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">View upcoming public event schedules and copy direct registration links.</p>
+              </Link>
+
+              <Link href="/portal/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-semibold text-white">Portal Event Desk (Read-Only)</h4>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">READ-ONLY</Badge>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">View internal details and schedule timelines for all registered events.</p>
+              </Link>
             </CardContent>
           </Card>
 
@@ -398,6 +417,10 @@ export default function DepartmentDeskPage() {
               <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
                 <span>Official Hashtag</span>
                 <span className="font-semibold text-emerald-400">#GCCBMSIT #GlobalExcellence</span>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+                <span>Event Creation Access</span>
+                <span className="font-semibold text-slate-400">Technical & EC Only</span>
               </div>
             </CardContent>
           </Card>
