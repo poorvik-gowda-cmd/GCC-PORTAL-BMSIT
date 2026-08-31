@@ -29,12 +29,21 @@ interface UserProfile {
   permissions: string[];
 }
 
+const PUBLIC_AUTH_PATHS = [
+  "/portal/login",
+  "/portal/mfa-verify",
+  "/portal/forgot-password",
+  "/portal/reset-password",
+];
+
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const isPublicAuthPath = PUBLIC_AUTH_PATHS.includes(pathname || "");
 
   useEffect(() => {
     let cancelled = false;
@@ -44,14 +53,31 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         if (!cancelled) {
           setUser(data.user);
           setAuthError(null);
+          if (isPublicAuthPath) {
+            // Redirect logged-in user to their home desk/dashboard
+            const u = data.user;
+            if (u.roles?.includes("SYSTEM_SUPER_ADMIN")) {
+              router.replace("/portal/system-admin");
+            } else if (u.roles?.includes("EXECUTIVE_COUNCIL")) {
+              router.replace("/portal/departments/EXECUTIVE_COUNCIL");
+            } else if (u.departments?.[0]) {
+              router.replace(`/portal/departments/${u.departments[0]}`);
+            } else {
+              router.replace("/portal/dashboard");
+            }
+          }
         }
       } catch (err) {
         if (!cancelled) {
           if (err instanceof ApiError && err.statusCode === 401) {
-            router.replace("/portal/login");
+            if (!isPublicAuthPath) {
+              router.replace("/portal/login");
+            }
             return;
           }
-          setAuthError("Unable to verify session. Please sign in.");
+          if (!isPublicAuthPath) {
+            setAuthError("Unable to verify session. Please sign in.");
+          }
         }
       } finally {
         if (!cancelled) setAuthChecked(true);
@@ -60,7 +86,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, pathname, isPublicAuthPath]);
 
   const handleLogout = async () => {
     try {
@@ -95,14 +121,23 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     navItems.push({ href: "/portal/system-admin", label: "System Admin", icon: ShieldCheck });
   }
 
-  // Show full-screen loader while verifying session
-  if (!authChecked) {
+  // Show full-screen loader while verifying session, except on public auth routes
+  if (!authChecked && !isPublicAuthPath) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
           <span className="text-xs text-slate-400">Verifying session credentials…</span>
         </div>
+      </div>
+    );
+  }
+
+  // Hide sidebar layout entirely on public auth routes
+  if (isPublicAuthPath) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center w-full">
+        {children}
       </div>
     );
   }
