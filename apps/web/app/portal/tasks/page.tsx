@@ -67,10 +67,6 @@ export default function TaskTrackerPage() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    setCreateForm((prev) => ({ ...prev, assignedTo: "" }));
-  }, [createForm.department]);
-
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 4000);
@@ -215,7 +211,7 @@ export default function TaskTrackerPage() {
       ? tasksList
       : tasksList.filter((t) => t.department === selectedDeptFilter);
 
-  const deptMembers = members.filter((m) => m.departments.includes(createForm.department));
+  const deptMembers = members;
 
   return (
     <div className="space-y-8">
@@ -509,7 +505,7 @@ export default function TaskTrackerPage() {
                       <option value="">Select Member</option>
                       {deptMembers.map((m) => (
                         <option key={m.id} value={m.id}>
-                          {m.fullName} ({m.email})
+                          {m.fullName} ({m.email}) [{m.departments.map(d => d.replace("_", " ")).join(", ") || "GENERAL"}]
                         </option>
                       ))}
                     </select>
