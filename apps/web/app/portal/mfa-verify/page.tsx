@@ -59,8 +59,14 @@ export default function MfaVerifyPage() {
         setStoredSessionToken(res.sessionToken);
       }
 
-      // Session cookie is now set by the backend — clear the temporary MFA token
+      // Clear temporary MFA token
       sessionStorage.removeItem("gcc_mfa_token");
+
+      if (res?.user?.roles?.includes("SYSTEM_SUPER_ADMIN")) {
+        router.replace("/portal/system-admin");
+        return;
+      }
+
       router.replace("/portal/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {

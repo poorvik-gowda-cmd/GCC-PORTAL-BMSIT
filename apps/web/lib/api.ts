@@ -3,7 +3,7 @@
 // apps/web/lib/api.ts
 // ==========================================================
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8787';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://gcc-portal-api-production.gcc-portal.workers.dev';
 
 /** Cached CSRF token for the current session. Refreshed on 403 CSRF errors. */
 let _csrfToken: string | null = null;

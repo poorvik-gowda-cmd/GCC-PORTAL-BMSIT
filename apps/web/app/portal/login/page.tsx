@@ -44,6 +44,22 @@ export default function MemberLoginPage() {
         setStoredSessionToken(data.sessionToken);
       }
 
+      if ("user" in data && data.user) {
+        const u = data.user;
+        if (u.roles?.includes("SYSTEM_SUPER_ADMIN")) {
+          router.push("/portal/system-admin");
+          return;
+        }
+        if (u.roles?.includes("EXECUTIVE_COUNCIL")) {
+          router.push("/portal/departments/EXECUTIVE_COUNCIL");
+          return;
+        }
+        if (u.departments?.[0]) {
+          router.push(`/portal/departments/${u.departments[0]}`);
+          return;
+        }
+      }
+
       router.push("/portal/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {

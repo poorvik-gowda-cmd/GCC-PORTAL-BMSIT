@@ -167,7 +167,7 @@ authRouter.post(
 
     await auditLog(c.env.DB, user.id, 'LOGIN_SUCCESS', { step: 'mfa_verified' }, ip, ua);
 
-    return c.json({ success: true, data: { user: profile } });
+    return c.json({ success: true, data: { user: profile, sessionToken } });
   }
 );
 
