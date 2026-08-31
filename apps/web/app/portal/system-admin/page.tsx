@@ -19,7 +19,9 @@ import {
   X,
   Lock,
   LogOut,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -542,22 +544,27 @@ export default function SystemAdminPage() {
       {activeTab === "departments" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {departments.map((dept) => (
-            <Card key={dept.id} className="glass-panel border-slate-800">
-              <CardHeader className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <Badge variant="default">{dept.id}</Badge>
-                  <span className="text-xs text-blue-400 font-medium font-mono">{dept.memberCount} Members</span>
-                </div>
-                <CardTitle className="text-lg text-white mt-1">{dept.name}</CardTitle>
-                <CardDescription className="text-xs text-slate-400">{dept.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-3 flex justify-between items-center">
-                  <span>Assigned Members</span>
-                  <span className="font-bold text-white">{dept.memberCount}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={dept.id} href={`/portal/departments/${dept.id}`} className="block group">
+              <Card className="glass-panel border-slate-800 hover:border-blue-500/40 transition-colors cursor-pointer">
+                <CardHeader className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="default">{dept.id}</Badge>
+                    <span className="text-xs text-blue-400 font-medium font-mono">{dept.memberCount} Members</span>
+                  </div>
+                  <CardTitle className="text-lg text-white mt-1 group-hover:text-blue-300 transition-colors">{dept.name}</CardTitle>
+                  <CardDescription className="text-xs text-slate-400">{dept.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-3 flex justify-between items-center">
+                    <span>Assigned Members</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{dept.memberCount}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}

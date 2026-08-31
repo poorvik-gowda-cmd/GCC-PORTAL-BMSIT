@@ -32,6 +32,7 @@ export const TaskPrioritySchema = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
 export const TaskStatusSchema = z.enum(['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'OVERDUE']);
 export const DepartmentIdSchema = z.enum([
   'EXECUTIVE_COUNCIL',
+  'RESEARCH_PUBLICATION',
   'EVENTS_OPERATIONS',
   'TECHNICAL',
   'MARKETING',

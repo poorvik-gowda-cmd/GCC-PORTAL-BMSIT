@@ -44,6 +44,13 @@ const DEPT_META: Record<
     icon: ShieldCheck,
     color: "text-amber-400 border-amber-500/30",
   },
+  RESEARCH_PUBLICATION: {
+    name: "Research & Publication Desk",
+    badge: "RESEARCH & KNOWLEDGE",
+    description: "Academic knowledge hub for tracking research papers, joint international publications, manuscript submissions, and collaborative research documentation.",
+    icon: FileText,
+    color: "text-indigo-400 border-indigo-500/30",
+  },
   EVENTS_OPERATIONS: {
     name: "Events & Operations Desk",
     badge: "EVENT LOGISTICS & OPS",
@@ -165,6 +172,60 @@ export default function DepartmentDeskPage() {
               <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
                 <span>Presidential Remarks</span>
                 <span className="font-bold text-blue-400">Enabled on All Tasks</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── 2. RESEARCH & PUBLICATION DESK ── */}
+      {deptKey === "RESEARCH_PUBLICATION" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="glass-panel border-indigo-500/30">
+            <CardHeader>
+              <CardTitle className="text-base text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-400" /> Research Papers & Publication Pipeline
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Track ongoing research, manuscript submissions, and joint international publications.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-colors">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-semibold text-white">Research Paper Tracker</h4>
+                  <Badge variant="outline" className="text-[9px] text-indigo-400 border-indigo-500/30">PIPELINE</Badge>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Track submitted, under-review, and published research papers with co-author details.</p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-semibold text-white">International Collaboration Docs</h4>
+                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">JOINT RESEARCH</Badge>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Archive joint research documents, co-authored papers, and partner university submissions.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-panel border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-base text-white">Publication Status Overview</CardTitle>
+              <CardDescription className="text-xs">Research progress metrics</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-xs text-slate-300">
+              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+                <span>Document Repository</span>
+                <span className="font-bold text-indigo-400">Google Drive Synced</span>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+                <span>Journal Submissions</span>
+                <span className="font-bold text-amber-400">Track via Pipeline</span>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+                <span>Collaboration Network</span>
+                <span className="font-bold text-emerald-400">Active MoU Partners</span>
               </div>
             </CardContent>
           </Card>

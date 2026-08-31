@@ -28,6 +28,15 @@ const DEPARTMENTS: DepartmentCard[] = [
     features: ["Global Task Assignment", "MoU Document Access", "All Department Overview", "President Remarks"],
   },
   {
+    id: "RESEARCH_PUBLICATION",
+    name: "Research & Publication",
+    description: "Academic research papers, joint publications, international collaborations, and knowledge dissemination.",
+    icon: FileText,
+    color: "text-indigo-400 border-indigo-500/30",
+    badge: "RESEARCH",
+    features: ["Research Paper Tracking", "Publication Pipeline", "Joint Collaboration Docs", "Journal Submissions"],
+  },
+  {
     id: "EVENTS_OPERATIONS",
     name: "Events & Operations",
     description: "Event planning, registration management, operational planning, attendance tracking, and feedback collection.",
