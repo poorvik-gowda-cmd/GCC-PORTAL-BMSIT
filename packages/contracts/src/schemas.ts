@@ -44,7 +44,7 @@ export const CreateTaskSchema = z.object({
   title: z.string().min(3).max(200),
   description: z.string().min(10).max(2000),
   department: DepartmentIdSchema,
-  assignedTo: z.string().uuid('Invalid user ID'),
+  assignedTo: z.string().min(5).max(100),
   deadline: z.string().datetime({ message: 'Invalid deadline datetime' }),
   priority: TaskPrioritySchema,
 });
