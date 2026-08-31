@@ -7,10 +7,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { apiPostPublic, ApiError } from "@/lib/api";
+import { apiPostPublic, ApiError, setStoredSessionToken } from "@/lib/api";
 
 interface LoginSuccess {
   user: { id: string; email: string; fullName: string; roles: string[]; departments: string[] };
+  sessionToken?: string;
 }
 interface LoginMfa {
   requiresMfa: boolean;
@@ -34,15 +35,15 @@ export default function MemberLoginPage() {
       const data = await apiPostPublic<LoginSuccess | LoginMfa>("/api/v1/auth/login", { email, password });
 
       if ("requiresMfa" in data && data.requiresMfa) {
-        // Store only the short-lived MFA session token in sessionStorage (NOT localStorage)
-        // This token expires in 5 minutes server-side — it grants no privileges
         sessionStorage.setItem("gcc_mfa_token", data.mfaSessionToken);
         router.push("/portal/mfa-verify");
         return;
       }
 
-      // Session is set as HttpOnly cookie by the backend.
-      // Do NOT store user data in localStorage — fetch from /auth/me on each page load instead.
+      if ("sessionToken" in data && data.sessionToken) {
+        setStoredSessionToken(data.sessionToken);
+      }
+
       router.push("/portal/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {

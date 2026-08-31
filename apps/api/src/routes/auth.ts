@@ -64,7 +64,7 @@ authRouter.post('/login', zValidator('json', LoginRequestSchema), async (c) => {
     `${SESSION_COOKIE}=${result.sessionToken}; HttpOnly; Secure; SameSite=${isProd ? 'None' : 'Lax'}; Path=/; Max-Age=${SESSION_TTL}`
   );
 
-  return c.json({ success: true, data: { user: result.user } }, 200);
+  return c.json({ success: true, data: { user: result.user, sessionToken: result.sessionToken } }, 200);
 });
 
 // GET /api/v1/auth/csrf-token — Issue CSRF token for authenticated session

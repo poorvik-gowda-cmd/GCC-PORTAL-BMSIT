@@ -1,4 +1,4 @@
-﻿// ==========================================================
+// ==========================================================
 // GCC Portal — Auth & Permission Middleware (Hono)
 // apps/api/src/middleware/auth.ts
 // ==========================================================
@@ -16,6 +16,18 @@ export type AuthVariables = {
 const SESSION_COOKIE = 'gcc_session';
 
 function getSessionToken(req: Request): string | null {
+  // 1. Check Authorization header (Bearer <token>)
+  const authHeader = req.headers.get('authorization') ?? req.headers.get('Authorization') ?? '';
+  if (authHeader.startsWith('Bearer ')) {
+    const bearer = authHeader.substring(7).trim();
+    if (bearer) return bearer;
+  }
+
+  // 2. Check X-Session-Token custom header
+  const customHeader = req.headers.get('x-session-token') ?? req.headers.get('X-Session-Token');
+  if (customHeader) return customHeader.trim();
+
+  // 3. Check Cookie header
   const cookieHeader = req.headers.get('cookie') ?? '';
   const cookies = Object.fromEntries(
     cookieHeader.split(';').map((c) => {

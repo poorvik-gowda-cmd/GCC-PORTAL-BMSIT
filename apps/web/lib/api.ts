@@ -25,6 +25,18 @@ export class ApiError extends Error {
   }
 }
 
+/** Get default request headers including optional Authorization Bearer token */
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (typeof window !== 'undefined') {
+    const token = sessionStorage.getItem('gcc_session_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
 /** Fetch and cache a CSRF token from the backend. */
 async function getCsrfToken(): Promise<string> {
   if (_csrfToken) return _csrfToken;
@@ -32,6 +44,7 @@ async function getCsrfToken(): Promise<string> {
   const resp = await fetch(`${API_BASE}/api/v1/auth/csrf-token`, {
     method: 'GET',
     credentials: 'include',
+    headers: getAuthHeaders(),
   });
 
   if (!resp.ok) {
@@ -50,6 +63,17 @@ async function getCsrfToken(): Promise<string> {
 /** Invalidate the cached CSRF token (call after 403 CSRF errors). */
 export function invalidateCsrfToken(): void {
   _csrfToken = null;
+}
+
+/** Store session token for Bearer authentication fallback */
+export function setStoredSessionToken(token: string | null): void {
+  if (typeof window !== 'undefined') {
+    if (token) {
+      sessionStorage.setItem('gcc_session_token', token);
+    } else {
+      sessionStorage.removeItem('gcc_session_token');
+    }
+  }
 }
 
 /** Parse response — always returns the typed body or throws ApiError. */
@@ -73,30 +97,30 @@ async function parseResponse<T>(resp: Response): Promise<T> {
   return body.data as T;
 }
 
-/** GET request — no CSRF token required. */
+/** GET request — credentialed fetch with optional Bearer token */
 export async function apiGet<T>(path: string): Promise<T> {
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'GET',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
   });
   return parseResponse<T>(resp);
 }
 
-/** POST request — automatically includes X-CSRF-Token. */
+/** POST request — automatically includes X-CSRF-Token & Bearer header */
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   let csrf: string | undefined;
   try {
     csrf = await getCsrfToken();
   } catch {
-    // If we can't get CSRF (e.g., unauthenticated), proceed without (backend will reject if needed)
+    // Proceed without CSRF if unauthenticated (e.g. login)
   }
 
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
       ...(csrf ? { 'X-CSRF-Token': csrf } : {}),
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -104,38 +128,41 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return parseResponse<T>(resp);
 }
 
-/** PATCH request — automatically includes X-CSRF-Token. */
+/** PATCH request — automatically includes X-CSRF-Token & Bearer header */
 export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
   const csrf = await getCsrfToken();
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'PATCH',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+    headers: {
+      ...getAuthHeaders(),
+      'X-CSRF-Token': csrf,
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   return parseResponse<T>(resp);
 }
 
-/** DELETE request — automatically includes X-CSRF-Token. */
+/** DELETE request — automatically includes X-CSRF-Token & Bearer header */
 export async function apiDelete<T>(path: string): Promise<T> {
   const csrf = await getCsrfToken();
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'DELETE',
     credentials: 'include',
-    headers: { 'X-CSRF-Token': csrf },
+    headers: {
+      ...getAuthHeaders(),
+      'X-CSRF-Token': csrf,
+    },
   });
   return parseResponse<T>(resp);
 }
 
-/**
- * POST without CSRF (for public endpoints like login/registration/Turnstile flows
- * that are explicitly exempt in the backend csrf middleware).
- */
+/** POST without CSRF (for public endpoints like login/registration) */
 export async function apiPostPublic<T>(path: string, body?: unknown): Promise<T> {
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   return parseResponse<T>(resp);

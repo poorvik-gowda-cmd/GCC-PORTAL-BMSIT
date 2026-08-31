@@ -7,10 +7,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { apiPostPublic, ApiError } from "@/lib/api";
+import { apiPostPublic, ApiError, setStoredSessionToken } from "@/lib/api";
 
 interface MfaVerifyResult {
   user: { id: string; email: string; fullName: string };
+  sessionToken?: string;
 }
 
 export default function MfaVerifyPage() {
@@ -52,7 +53,11 @@ export default function MfaVerifyPage() {
       // mfa/verify is NOT in the CSRF exempt list but there's no session cookie yet
       // so the csrf middleware will skip enforcement (hasSession = false).
       // We use apiPostPublic to avoid a CSRF fetch attempt before a session exists.
-      await apiPostPublic<MfaVerifyResult>("/api/v1/auth/mfa/verify", payload);
+      const res = await apiPostPublic<MfaVerifyResult>("/api/v1/auth/mfa/verify", payload);
+
+      if (res?.sessionToken) {
+        setStoredSessionToken(res.sessionToken);
+      }
 
       // Session cookie is now set by the backend — clear the temporary MFA token
       sessionStorage.removeItem("gcc_mfa_token");

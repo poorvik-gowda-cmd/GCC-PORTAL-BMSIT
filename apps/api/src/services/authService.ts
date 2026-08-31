@@ -183,17 +183,20 @@ async function loadUserProfile(db: D1Database, user: DbUser): Promise<UserProfil
   const roles = rolesResult.results.map((r: { role_id: string }) => r.role_id as RoleId);
   const departments = deptsResult.results.map((d: { department_id: string }) => d.department_id as DepartmentId);
 
-  const placeholders = roles.map(() => '?').join(',');
-  const permsResult = await db
-    .prepare(
-      `SELECT DISTINCT rp.permission_id
-       FROM role_permissions rp
-       WHERE rp.role_id IN (${placeholders})`
-    )
-    .bind(...roles)
-    .all<{ permission_id: string }>();
+  let permissions: Permission[] = [];
+  if (roles.length > 0) {
+    const placeholders = roles.map(() => '?').join(',');
+    const permsResult = await db
+      .prepare(
+        `SELECT DISTINCT rp.permission_id
+         FROM role_permissions rp
+         WHERE rp.role_id IN (${placeholders})`
+      )
+      .bind(...roles)
+      .all<{ permission_id: string }>();
 
-  const permissions = permsResult.results.map((p: { permission_id: string }) => p.permission_id as Permission);
+    permissions = permsResult.results.map((p: { permission_id: string }) => p.permission_id as Permission);
+  }
 
   return {
     id: user.id,
