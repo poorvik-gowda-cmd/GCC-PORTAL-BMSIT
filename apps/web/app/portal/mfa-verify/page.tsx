@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { apiPostPublic, ApiError, setStoredSessionToken } from "@/lib/api";
 
 interface MfaVerifyResult {
-  user: { id: string; email: string; fullName: string };
+  user: { id: string; email: string; fullName: string; roles?: string[]; departments?: string[] };
   sessionToken?: string;
 }
 
