@@ -84,27 +84,9 @@ export async function loginUser(
   }
 
   const profile = await loadUserProfile(db, user);
-  const isPrivileged = profile.roles.includes('EXECUTIVE_COUNCIL') || profile.roles.includes('SYSTEM_SUPER_ADMIN');
 
-  // Check if privileged account requires MFA step 2
-  if (isPrivileged && user.mfa_enabled === 1) {
-    const mfaSessionToken = generateSessionToken();
-    const mfaSessionId = await sha256Hex(mfaSessionToken);
-    const now = Math.floor(Date.now() / 1000);
-    const expiresAt = now + MFA_SESSION_TTL_SECONDS;
-
-    await db
-      .prepare(
-        `INSERT INTO mfa_sessions (id, user_id, expires_at, created_at)
-         VALUES (?, ?, ?, ?)`
-      )
-      .bind(mfaSessionId, user.id, expiresAt, now)
-      .run();
-
-    await auditLog(db, user.id, 'LOGIN_SUCCESS', { step: 'password_verified_mfa_pending' }, ip, userAgent);
-
-    return { success: false, requiresMfa: true, mfaSessionToken };
-  }
+  // MFA requirement is removed per user request for simpler portal access.
+  // We issue the full session token immediately.
 
   // Issue full session token if MFA not required
   const sessionToken = generateSessionToken();
