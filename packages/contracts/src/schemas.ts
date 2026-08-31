@@ -75,16 +75,14 @@ export const CreateEventSchema = z.object({
 export type CreateEventRequest = z.infer<typeof CreateEventSchema>;
 
 export const EventRegistrationSchema = z.object({
-  turnstileToken: z.string().min(1, 'Turnstile token required'),
-  fullName: z.string().min(2).max(100),
-  email: z.string().email(),
-  phone: z
-    .string()
-    .regex(/^[6-9]\d{9}$/, 'Invalid Indian mobile number'),
-  collegeName: z.string().max(200).optional(),
-  usn: z.string().max(20).optional(),
-  department: z.string().max(100).optional(),
-  customFields: z.record(z.string(), z.string().max(500)).optional(),
+  turnstileToken: z.string().optional(),
+  fullName: z.string().min(2, 'Full name required').max(100),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(7, 'Phone number must be at least 7 digits').max(20),
+  collegeName: z.string().max(200).optional().nullable(),
+  usn: z.string().max(50).optional().nullable(),
+  department: z.string().max(100).optional().nullable(),
+  customFields: z.record(z.string(), z.string().max(500)).optional().nullable(),
 });
 export type EventRegistrationRequest = z.infer<typeof EventRegistrationSchema>;
 
