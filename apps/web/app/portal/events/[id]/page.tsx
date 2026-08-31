@@ -31,6 +31,7 @@ export default function InternalEventDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [togglingReg, setTogglingReg] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -70,6 +71,21 @@ export default function InternalEventDetailsPage() {
       showToast("error", err instanceof ApiError ? err.message : "Failed to change event status.");
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleRegToggle = async () => {
+    if (!event) return;
+    const newStatus = event.registrationStatus === "OPEN" ? "CLOSED" : "OPEN";
+    setTogglingReg(true);
+    try {
+      await apiPost(`/api/v1/events/${event.eventId}/registration-status`, { status: newStatus });
+      showToast("success", `Registration ${newStatus === "OPEN" ? "opened" : "closed"} successfully.`);
+      await loadEvent();
+    } catch (err) {
+      showToast("error", err instanceof ApiError ? err.message : "Failed to change registration status.");
+    } finally {
+      setTogglingReg(false);
     }
   };
 
@@ -119,7 +135,7 @@ export default function InternalEventDetailsPage() {
           <p className="text-xs font-mono text-blue-400">{event.eventId}</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={event.eventStatus === "PUBLISHED" ? "outline" : "gradient"}
             size="sm"
@@ -128,6 +144,15 @@ export default function InternalEventDetailsPage() {
             className="text-xs gap-1.5"
           >
             {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : event.eventStatus === "PUBLISHED" ? "Set to Draft" : "Publish to Website"}
+          </Button>
+          <Button
+            variant={event.registrationStatus === "OPEN" ? "destructive" : "gradient"}
+            size="sm"
+            onClick={handleRegToggle}
+            disabled={togglingReg}
+            className="text-xs gap-1.5"
+          >
+            {togglingReg ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : event.registrationStatus === "OPEN" ? "Close Registration" : "Open Registration"}
           </Button>
           <Link href={`/portal/events/${event.eventId}/registrations`}>
             <Button variant="secondary" size="sm" className="text-xs gap-1.5">

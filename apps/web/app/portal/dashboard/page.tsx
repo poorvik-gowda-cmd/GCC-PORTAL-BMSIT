@@ -260,20 +260,22 @@ export default function PortalDashboardPage() {
             ) : (
               <div className="space-y-2">
                 {events.slice(0, 5).map((evt) => (
-                  <div key={evt.eventId} className="flex items-center justify-between p-3 rounded-lg bg-slate-950/60 border border-slate-800/60">
-                    <div>
-                      <p className="text-xs font-semibold text-white">{evt.title}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">{evt.eventId}</p>
+                  <Link key={evt.eventId} href={`/portal/events/${evt.eventId}`} className="block">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-950/60 border border-slate-800/60 hover:border-blue-500/40 transition-colors">
+                      <div>
+                        <p className="text-xs font-semibold text-white">{evt.title}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">{evt.eventId}</p>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <Badge variant={evt.eventStatus === "PUBLISHED" ? "success" : "secondary"} className="text-[9px]">
+                          {evt.eventStatus}
+                        </Badge>
+                        <Badge variant={evt.registrationStatus === "OPEN" ? "success" : evt.registrationStatus === "FULL" ? "destructive" : "secondary"} className="text-[9px]">
+                          Reg: {evt.registrationStatus}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      <Badge variant={evt.eventStatus === "PUBLISHED" ? "success" : "secondary"} className="text-[9px]">
-                        {evt.eventStatus}
-                      </Badge>
-                      <Badge variant={evt.registrationStatus === "OPEN" ? "success" : "secondary"} className="text-[9px]">
-                        {evt.registrationStatus}
-                      </Badge>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

@@ -11,6 +11,7 @@ import {
   QrCode,
   LogOut,
   User,
+  Users,
   Loader2,
   AlertCircle,
   ShieldCheck,
@@ -112,6 +113,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     { href: "/portal/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/portal/tasks", label: "Task Tracker", icon: CheckSquare },
     { href: "/portal/events", label: "Event Desk", icon: Calendar },
+    { href: "/portal/registrations", label: "Registrations Hub", icon: Users },
     { href: deptHref, label: "Department Desks", icon: FolderGit2 },
     { href: "/portal/qr", label: "QR Manager", icon: QrCode },
   ];

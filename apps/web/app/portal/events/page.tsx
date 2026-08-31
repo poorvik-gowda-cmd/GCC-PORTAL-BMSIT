@@ -38,6 +38,7 @@ export default function PortalEventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [forbidden, setForbidden] = useState(false);
   const [publishingId, setPublishingId] = useState<string | null>(null);
+  const [togglingRegId, setTogglingRegId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -121,6 +122,21 @@ export default function PortalEventsPage() {
       showToast("error", msg);
     } finally {
       setPublishingId(null);
+    }
+  };
+
+  const handleRegToggle = async (evt: GccEvent) => {
+    const newStatus = evt.registrationStatus === "OPEN" ? "CLOSED" : "OPEN";
+    setTogglingRegId(evt.eventId);
+    try {
+      await apiPost(`/api/v1/events/${evt.eventId}/registration-status`, { status: newStatus });
+      showToast("success", `Registration ${newStatus === "OPEN" ? "opened" : "closed"} for event.`);
+      await loadEvents();
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : "Failed to change registration status.";
+      showToast("error", msg);
+    } finally {
+      setTogglingRegId(null);
     }
   };
 
@@ -315,21 +331,38 @@ export default function PortalEventsPage() {
               </CardHeader>
 
               <CardContent className="pt-0 space-y-2">
-                <Button
-                  variant={evt.eventStatus === "PUBLISHED" ? "outline" : "gradient"}
-                  size="sm"
-                  onClick={() => handlePublishToggle(evt)}
-                  disabled={publishingId === evt.eventId}
-                  className="w-full text-xs"
-                >
-                  {publishingId === evt.eventId ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : evt.eventStatus === "PUBLISHED" ? (
-                    "Set to Draft"
-                  ) : (
-                    "Publish to Website"
-                  )}
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={evt.eventStatus === "PUBLISHED" ? "outline" : "gradient"}
+                    size="sm"
+                    onClick={() => handlePublishToggle(evt)}
+                    disabled={publishingId === evt.eventId}
+                    className="w-full text-xs"
+                  >
+                    {publishingId === evt.eventId ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : evt.eventStatus === "PUBLISHED" ? (
+                      "Set Draft"
+                    ) : (
+                      "Publish"
+                    )}
+                  </Button>
+                  <Button
+                    variant={evt.registrationStatus === "OPEN" ? "destructive" : "gradient"}
+                    size="sm"
+                    onClick={() => handleRegToggle(evt)}
+                    disabled={togglingRegId === evt.eventId}
+                    className="w-full text-xs"
+                  >
+                    {togglingRegId === evt.eventId ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : evt.registrationStatus === "OPEN" ? (
+                      "Close Reg"
+                    ) : (
+                      "Open Reg"
+                    )}
+                  </Button>
+                </div>
                 <Link href={`/portal/events/${evt.eventId}/registrations`} className="block">
                   <Button variant="secondary" size="sm" className="w-full text-xs gap-1.5">
                     <Eye className="w-3.5 h-3.5" /> View Registrations

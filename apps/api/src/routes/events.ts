@@ -55,6 +55,7 @@ function dbEventToGccEvent(row: DbEvent): GccEvent {
     registrationStatus: row.registration_status as RegistrationStatus,
     eventStatus: row.event_status as EventStatus,
     capacity: row.capacity,
+    registeredCount: row.registered_count ?? 0,
     bannerImageRef: row.banner_image_ref,
     createdBy: row.created_by,
     createdAt: new Date(row.created_at * 1000).toISOString(),
@@ -220,6 +221,38 @@ eventsRouter.post('/:id/publish', requireAuth, requirePermission('EVENT_PUBLISH'
 
   await auditLog(c.env.DB, user.id, 'EVENT_PUBLISHED', { eventId, status }, ip, ua);
   return c.json({ success: true, data: { eventId, status } });
+});
+
+// POST /api/v1/events/:id/registration-status — Toggle registration open/closed
+eventsRouter.post('/:id/registration-status', requireAuth, requirePermission('EVENT_EDIT'), async (c) => {
+  const user = c.get('user');
+  const eventId = c.req.param('id');
+  const ip = c.req.header('CF-Connecting-IP') ?? '';
+  const ua = c.req.header('User-Agent') ?? '';
+  const now = Math.floor(Date.now() / 1000);
+
+  const body = await c.req.json<{ status: 'OPEN' | 'CLOSED' }>();
+  if (!body.status || !['OPEN', 'CLOSED'].includes(body.status)) {
+    return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid registration status. Must be OPEN or CLOSED.' } }, 400);
+  }
+
+  const result = await c.env.DB
+    .prepare('UPDATE events SET registration_status = ?, updated_at = ? WHERE event_id = ?')
+    .bind(body.status, now, eventId)
+    .run();
+
+  if (result.meta.changes === 0) {
+    return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Event not found' } }, 404);
+  }
+
+  // Async sync to Sheets
+  const adapter = getAdapter(c.env);
+  runBackground(c, adapter.setRegistrationStatus(eventId, body.status as RegistrationStatus).catch((err) =>
+    console.error(`[SheetsSync] Event reg status sync failed: ${err.message}`)
+  ));
+
+  await auditLog(c.env.DB, user.id, 'ADMIN_ACTION', { action: 'EVENT_REGISTRATION_STATUS_CHANGED', eventId, status: body.status }, ip, ua);
+  return c.json({ success: true, data: { eventId, registrationStatus: body.status } });
 });
 
 // POST /api/v1/events/:id/register — Public registration (atomic)

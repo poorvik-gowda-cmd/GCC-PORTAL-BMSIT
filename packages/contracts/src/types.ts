@@ -158,6 +158,7 @@ export interface GccEvent {
   registrationStatus: RegistrationStatus;
   eventStatus: EventStatus;
   capacity?: number | null;
+  registeredCount?: number;
   bannerImageRef?: string | null;
   createdBy: string;
   createdAt: string;

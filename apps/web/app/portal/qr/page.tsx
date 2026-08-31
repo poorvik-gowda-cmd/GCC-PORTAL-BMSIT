@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { QrCode, Copy, Check, Loader2, AlertCircle, Calendar } from "lucide-react";
+import { QrCode, Copy, Check, Loader2, AlertCircle, Calendar, Download } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,21 @@ export default function QrManagerPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleDownloadQr = async (qrUrl: string, eventTitle: string) => {
+    try {
+      const resp = await fetch(qrUrl);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `QR-${eventTitle.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(qrUrl, "_blank");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -101,17 +116,25 @@ export default function QrManagerPage() {
           {events.map((evt) => {
             const targetUrl = `/events/${evt.eventId}`;
             const qrId = `QR-${evt.eventId}`;
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+              typeof window !== "undefined" ? `${window.location.origin}${targetUrl}` : targetUrl
+            )}`;
 
             return (
-              <Card key={evt.eventId} className="glass-panel border-slate-800 space-y-4">
+              <Card key={evt.eventId} className="glass-panel border-slate-800 space-y-4 flex flex-col justify-between">
                 <CardHeader className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Badge variant={evt.eventStatus === "PUBLISHED" ? "success" : "secondary"}>
-                      {evt.eventStatus}
-                    </Badge>
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={evt.eventStatus === "PUBLISHED" ? "success" : "secondary"}>
+                        {evt.eventStatus}
+                      </Badge>
+                      <Badge variant={evt.registrationStatus === "OPEN" ? "success" : evt.registrationStatus === "FULL" ? "destructive" : "secondary"} className="text-[9px]">
+                        Reg: {evt.registrationStatus}
+                      </Badge>
+                    </div>
                     <span className="text-xs font-mono text-blue-400">{qrId}</span>
                   </div>
-                  <CardTitle className="text-base text-white">{evt.title}</CardTitle>
+                  <CardTitle className="text-base text-white leading-snug">{evt.title}</CardTitle>
                   <CardDescription className="text-xs text-slate-400 font-mono">
                     Target: {targetUrl}
                   </CardDescription>
@@ -121,23 +144,30 @@ export default function QrManagerPage() {
                   {/* Real Scannable QR Image */}
                   <div className="w-40 h-40 mx-auto rounded-xl bg-white p-2.5 flex items-center justify-center shadow-lg border border-slate-200">
                     <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                        typeof window !== "undefined" ? `${window.location.origin}${targetUrl}` : targetUrl
-                      )}`}
+                      src={qrImageUrl}
                       alt={`QR Code for ${evt.title}`}
                       className="w-36 h-36 object-contain"
                     />
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleCopy(targetUrl, qrId)}
-                      className="w-full text-xs gap-1.5"
+                      className="w-full text-xs gap-1"
                     >
                       {copiedId === qrId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                       {copiedId === qrId ? "Copied!" : "Copy Link"}
+                    </Button>
+                    <Button
+                      variant="gradient"
+                      size="sm"
+                      onClick={() => handleDownloadQr(qrImageUrl, evt.title)}
+                      className="w-full text-xs gap-1"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download
                     </Button>
                   </div>
                 </CardContent>
