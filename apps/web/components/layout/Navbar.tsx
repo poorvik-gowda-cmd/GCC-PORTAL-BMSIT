@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -51,11 +51,12 @@ export function Navbar() {
 
         {/* Portal Sign In CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/portal/login">
-            <Button variant="gradient" size="sm" className="gap-2">
-              <Shield className="w-4 h-4" />
-              Member Portal
-            </Button>
+          <Link
+            href="/portal/login"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-indigo-500 transition-all active:scale-95"
+          >
+            <Shield className="w-4 h-4" />
+            Member Portal
           </Link>
         </div>
 
@@ -84,11 +85,13 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-3 border-t border-slate-800">
-            <Link href="/portal/login" onClick={() => setMobileOpen(false)}>
-              <Button variant="gradient" className="w-full justify-center gap-2">
-                <LogIn className="w-4 h-4" />
-                Member Portal Sign In
-              </Button>
+            <Link
+              href="/portal/login"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all"
+            >
+              <LogIn className="w-4 h-4" />
+              Member Portal Sign In
             </Link>
           </div>
         </div>

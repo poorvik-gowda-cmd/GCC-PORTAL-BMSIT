@@ -139,10 +139,11 @@ export default function HomePage() {
               Access your department desk, manage assigned tasks, track event registrations, and view operational resources. Login requires a pre-existing GCC database account.
             </p>
           </div>
-          <Link href="/portal/login" className="shrink-0">
-            <Button variant="gradient" size="lg" className="gap-2">
-              Sign In to Portal <ArrowRight className="w-5 h-5" />
-            </Button>
+          <Link
+            href="/portal/login"
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-indigo-500 transition-all active:scale-95"
+          >
+            Sign In to Portal <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>

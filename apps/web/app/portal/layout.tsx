@@ -164,10 +164,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                 <span>Session Required</span>
               </div>
               <p className="text-[10px] text-slate-400">Please sign in to access internal portal features.</p>
-              <Link href="/portal/login" className="block">
-                <Button variant="gradient" size="sm" className="w-full text-[10px]">
-                  Sign In to GCC
-                </Button>
+              <Link
+                href="/portal/login"
+                className="flex items-center justify-center w-full py-1.5 px-3 rounded-lg text-[10px] font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:from-blue-500 hover:to-indigo-500 transition-all"
+              >
+                Sign In to GCC
               </Link>
             </div>
           )}
@@ -207,10 +208,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               <LogOut className="w-3.5 h-3.5" /> Log Out
             </Button>
           ) : (
-            <Link href="/portal/login" className="block">
-              <Button variant="outline" size="sm" className="w-full gap-2 text-xs border-slate-800 text-slate-300">
-                Member Sign In
-              </Button>
+            <Link
+              href="/portal/login"
+              className="flex items-center justify-center gap-2 w-full py-1.5 px-3 rounded-lg text-xs font-medium border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+            >
+              Member Sign In
             </Link>
           )}
         </div>
@@ -225,10 +227,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <p className="text-xs text-slate-400">
               You are currently viewing the portal in guest mode. Please sign in with your GCC authorized credentials to view tasks, department desks, and system management.
             </p>
-            <Link href="/portal/login" className="inline-block">
-              <Button variant="gradient" size="sm" className="gap-2">
-                Sign In Now
-              </Button>
+            <Link
+              href="/portal/login"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all"
+            >
+              Sign In Now
             </Link>
           </div>
         ) : (
