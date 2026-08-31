@@ -53,7 +53,8 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/portal/login"
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-indigo-500 transition-all active:scale-95"
+            onClick={() => { window.location.href = '/portal/login'; }}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-indigo-500 transition-all active:scale-95 cursor-pointer"
           >
             <Shield className="w-4 h-4" />
             Member Portal
@@ -87,8 +88,8 @@ export function Navbar() {
           <div className="pt-3 border-t border-slate-800">
             <Link
               href="/portal/login"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all"
+              onClick={() => { setMobileOpen(false); window.location.href = '/portal/login'; }}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               Member Portal Sign In

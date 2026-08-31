@@ -166,7 +166,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               <p className="text-[10px] text-slate-400">Please sign in to access internal portal features.</p>
               <Link
                 href="/portal/login"
-                className="flex items-center justify-center w-full py-1.5 px-3 rounded-lg text-[10px] font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:from-blue-500 hover:to-indigo-500 transition-all"
+                onClick={() => { window.location.href = '/portal/login'; }}
+                className="flex items-center justify-center w-full py-1.5 px-3 rounded-lg text-[10px] font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:from-blue-500 hover:to-indigo-500 transition-all cursor-pointer"
               >
                 Sign In to GCC
               </Link>
@@ -210,7 +211,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           ) : (
             <Link
               href="/portal/login"
-              className="flex items-center justify-center gap-2 w-full py-1.5 px-3 rounded-lg text-xs font-medium border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+              onClick={() => { window.location.href = '/portal/login'; }}
+              className="flex items-center justify-center gap-2 w-full py-1.5 px-3 rounded-lg text-xs font-medium border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
             >
               Member Sign In
             </Link>
@@ -229,7 +231,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             </p>
             <Link
               href="/portal/login"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all"
+              onClick={() => { window.location.href = '/portal/login'; }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all cursor-pointer"
             >
               Sign In Now
             </Link>

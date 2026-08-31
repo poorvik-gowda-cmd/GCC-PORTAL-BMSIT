@@ -137,9 +137,19 @@ export default function MemberLoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" variant="gradient" className="w-full justify-center text-sm py-2.5" disabled={loading}>
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In to Member Portal"}
-              </Button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center text-sm py-2.5 px-4 font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg shadow-lg cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Signing in...
+                  </span>
+                ) : (
+                  "Sign In to Member Portal"
+                )}
+              </button>
             </form>
           </CardContent>
 
