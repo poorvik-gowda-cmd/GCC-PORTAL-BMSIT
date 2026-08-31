@@ -298,6 +298,14 @@ export default function DepartmentDeskPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              <Link href="/portal/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-colors">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-semibold text-white">Event Registration & Creation Desk</h4>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">EVENT EDIT</Badge>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Manage events, open/close registrations, view participants list, and edit details.</p>
+              </Link>
+
               <Link href="/portal/qr" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-colors">
                 <div className="flex justify-between items-center">
                   <h4 className="text-xs font-semibold text-white">Dynamic QR Code Registries</h4>
@@ -326,10 +334,17 @@ export default function DepartmentDeskPage() {
                 <span>D1 Database Connection</span>
                 <span className="font-semibold text-emerald-400">Connected (Active)</span>
               </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Google Sheets Live Adapter</span>
-                <span className="font-semibold text-emerald-400">Synced</span>
-              </div>
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1_FZpVwncW3mNOrwp62T4uoIwkBeXYb6ge1BXgARcafM" 
+                target="_blank" 
+                rel="noreferrer"
+                className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-cyan-500/50 flex justify-between items-center transition-colors group cursor-pointer"
+              >
+                <span className="group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                  Google Sheets Live Database <ExternalLink className="w-3 h-3 text-slate-500" />
+                </span>
+                <span className="font-semibold text-emerald-400">Synced & Viewable</span>
+              </a>
               <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
                 <span>Turnstile Bot Protection</span>
                 <span className="font-semibold text-emerald-400">Enforced</span>

@@ -7,8 +7,7 @@ import { getGoogleAccessToken, type ServiceAccountCredentials } from './googleAu
 
 const DRIVE_BASE = 'https://www.googleapis.com/drive/v3';
 const SCOPES = [
-  'https://www.googleapis.com/auth/drive.readonly',
-  'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/drive',
 ];
 
 export interface DriveFile {
@@ -133,7 +132,7 @@ export class DriveClient {
     if (!resp.ok) throw new Error(`Drive search error: ${resp.status}`);
     const data = (await resp.json()) as { files: { id: string }[] };
 
-    if (data.files && data.files.length > 0) {
+    if (data.files && data.files.length > 0 && data.files[0]) {
       return data.files[0].id;
     }
 
