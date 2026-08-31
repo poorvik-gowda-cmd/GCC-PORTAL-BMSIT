@@ -13,8 +13,12 @@ export const corsAndHeaders = createMiddleware<{ Bindings: Env }>(async (c, next
   // Always set Vary to prevent cache poisoning across origins
   c.header('Vary', 'Origin');
 
-  if (allowedOrigins.includes(origin)) {
-    c.header('Access-Control-Allow-Origin', origin);
+  const isVercelOrigin = origin.endsWith('.vercel.app');
+  const isLocalhostOrigin = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+  const isExplicitlyAllowed = allowedOrigins.includes(origin);
+
+  if (isExplicitlyAllowed || isVercelOrigin || isLocalhostOrigin || !origin) {
+    c.header('Access-Control-Allow-Origin', origin || '*');
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
     c.header('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,X-CSRF-Token');

@@ -61,7 +61,7 @@ authRouter.post('/login', zValidator('json', LoginRequestSchema), async (c) => {
   const isProd = c.env.APP_ENV === 'production';
   c.header(
     'Set-Cookie',
-    `${SESSION_COOKIE}=${result.sessionToken}; HttpOnly; ${isProd ? 'Secure; ' : ''}SameSite=Lax; Path=/; Max-Age=${SESSION_TTL}`
+    `${SESSION_COOKIE}=${result.sessionToken}; HttpOnly; Secure; SameSite=${isProd ? 'None' : 'Lax'}; Path=/; Max-Age=${SESSION_TTL}`
   );
 
   return c.json({ success: true, data: { user: result.user } }, 200);
@@ -162,7 +162,7 @@ authRouter.post(
     const isProd = c.env.APP_ENV === 'production';
     c.header(
       'Set-Cookie',
-      `${SESSION_COOKIE}=${sessionToken}; HttpOnly; ${isProd ? 'Secure; ' : ''}SameSite=Lax; Path=/; Max-Age=${SESSION_TTL}`
+      `${SESSION_COOKIE}=${sessionToken}; HttpOnly; Secure; SameSite=${isProd ? 'None' : 'Lax'}; Path=/; Max-Age=${SESSION_TTL}`
     );
 
     await auditLog(c.env.DB, user.id, 'LOGIN_SUCCESS', { step: 'mfa_verified' }, ip, ua);
