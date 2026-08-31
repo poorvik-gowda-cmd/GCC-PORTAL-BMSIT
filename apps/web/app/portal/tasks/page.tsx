@@ -27,6 +27,8 @@ export default function TaskTrackerPage() {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [canAssignTask, setCanAssignTask] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ id: string; roles: string[]; permissions: string[] } | null>(null);
+  const [members, setMembers] = useState<{ id: string; fullName: string; email: string; departments: string[] }[]>([]);
 
   const [selectedDeptFilter, setSelectedDeptFilter] = useState("ALL");
   const [remarkInput, setRemarkInput] = useState<{ [key: string]: string }>({});
@@ -45,9 +47,10 @@ export default function TaskTrackerPage() {
   });
 
   useEffect(() => {
-    apiGet<{ user: { roles: string[]; permissions: string[] } }>("/api/v1/auth/me")
+    apiGet<{ user: { id: string; roles: string[]; permissions: string[] } }>("/api/v1/auth/me")
       .then((d) => {
         const u = d.user;
+        setCurrentUser(u);
         const allowed =
           u.permissions?.includes("TASK_ASSIGN_GLOBAL") ||
           u.permissions?.includes("TASK_ASSIGN_DEPARTMENT") ||
@@ -56,7 +59,17 @@ export default function TaskTrackerPage() {
         setCanAssignTask(allowed);
       })
       .catch(() => {});
+
+    apiGet<{ members: { id: string; fullName: string; email: string; departments: string[] }[] }>("/api/v1/members")
+      .then((d) => {
+        setMembers(d.members || []);
+      })
+      .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setCreateForm((prev) => ({ ...prev, assignedTo: "" }));
+  }, [createForm.department]);
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -183,10 +196,26 @@ export default function TaskTrackerPage() {
     }
   };
 
+  const canModifyTaskStatus = (task: Task) => {
+    if (!currentUser) return false;
+    return (
+      currentUser.roles.includes("SYSTEM_SUPER_ADMIN") ||
+      currentUser.roles.includes("EXECUTIVE_COUNCIL") ||
+      currentUser.id === task.assignedTo
+    );
+  };
+
+  const canAddRemark = 
+    !!(currentUser?.permissions?.includes("TASK_REMARK") ||
+    currentUser?.roles?.includes("SYSTEM_SUPER_ADMIN") ||
+    currentUser?.roles?.includes("EXECUTIVE_COUNCIL"));
+
   const filteredTasks =
     selectedDeptFilter === "ALL"
       ? tasksList
       : tasksList.filter((t) => t.department === selectedDeptFilter);
+
+  const deptMembers = members.filter((m) => m.departments.includes(createForm.department));
 
   return (
     <div className="space-y-8">
@@ -339,31 +368,33 @@ export default function TaskTrackerPage() {
                     </div>
                   </div>
 
-                  {/* Actions: Mark completed / in progress */}
-                  <div className="flex items-center gap-2">
-                    {task.status !== "COMPLETED" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={updatingTaskId === task.taskId}
-                        onClick={() => handleUpdateStatus(task.taskId, "COMPLETED")}
-                        className="text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 h-7"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Completed
-                      </Button>
-                    )}
-                    {task.status === "NOT_STARTED" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={updatingTaskId === task.taskId}
-                        onClick={() => handleUpdateStatus(task.taskId, "IN_PROGRESS")}
-                        className="text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/10 h-7"
-                      >
-                        <Clock className="w-3.5 h-3.5 mr-1" /> Mark In Progress
-                      </Button>
-                    )}
-                  </div>
+                   {/* Actions: Mark completed / in progress */}
+                  {canModifyTaskStatus(task) && (
+                    <div className="flex items-center gap-2">
+                      {task.status !== "COMPLETED" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={updatingTaskId === task.taskId}
+                          onClick={() => handleUpdateStatus(task.taskId, "COMPLETED")}
+                          className="text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 h-7"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Completed
+                        </Button>
+                      )}
+                      {task.status === "NOT_STARTED" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={updatingTaskId === task.taskId}
+                          onClick={() => handleUpdateStatus(task.taskId, "IN_PROGRESS")}
+                          className="text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/10 h-7"
+                        >
+                          <Clock className="w-3.5 h-3.5 mr-1" /> Mark In Progress
+                        </Button>
+                      )}
+                    </div>
+                  )}
 
                   {/* President Remark */}
                   {task.presidentRemark && (
@@ -376,23 +407,25 @@ export default function TaskTrackerPage() {
                   )}
 
                   {/* Add Remark Form */}
-                  <div className="flex gap-2 pt-2 border-t border-slate-800">
-                    <Input
-                      placeholder="Add Executive Remark..."
-                      value={remarkInput[task.taskId] || ""}
-                      onChange={(e) => setRemarkInput({ ...remarkInput, [task.taskId]: e.target.value })}
-                      className="text-xs h-9"
-                    />
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={updatingTaskId === task.taskId || !remarkInput[task.taskId]?.trim()}
-                      onClick={() => handleAddRemark(task.taskId)}
-                      className="text-xs shrink-0 gap-1"
-                    >
-                      <Send className="w-3 h-3" /> Add Remark
-                    </Button>
-                  </div>
+                  {canAddRemark && (
+                    <div className="flex gap-2 pt-2 border-t border-slate-800">
+                      <Input
+                        placeholder="Add Executive Remark..."
+                        value={remarkInput[task.taskId] || ""}
+                        onChange={(e) => setRemarkInput({ ...remarkInput, [task.taskId]: e.target.value })}
+                        className="text-xs h-9"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={updatingTaskId === task.taskId || !remarkInput[task.taskId]?.trim()}
+                        onClick={() => handleAddRemark(task.taskId)}
+                        className="text-xs shrink-0 gap-1"
+                      >
+                        <Send className="w-3.5 h-3.5" /> Add Remark
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -466,13 +499,20 @@ export default function TaskTrackerPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-300">Assignee User ID *</label>
-                    <Input
-                      required
-                      placeholder="e.g. USER-12345678"
+                    <label className="text-xs font-medium text-slate-300">Assign To *</label>
+                    <select
                       value={createForm.assignedTo}
                       onChange={(e) => setCreateForm({ ...createForm, assignedTo: e.target.value })}
-                    />
+                      className="w-full h-10 px-3 rounded-lg bg-slate-950/60 border border-slate-700/80 text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Member</option>
+                      {deptMembers.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.fullName} ({m.email})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-300">Deadline *</label>
