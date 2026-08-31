@@ -1,4 +1,4 @@
-﻿// ==========================================================
+// ==========================================================
 // GCC Portal — Google Drive Client
 // packages/google-adapters/src/driveClient.ts
 // ==========================================================
@@ -114,5 +114,44 @@ export class DriveClient {
     if (!resp.ok) throw new Error(`Drive upload error: ${resp.status} ${await resp.text()}`);
     const data = (await resp.json()) as { id: string };
     return data.id;
+  }
+
+  /**
+   * Find a folder by name inside a parent folder, or create it if not found.
+   */
+  async findOrCreateFolder(parentFolderId: string, folderName: string): Promise<string> {
+    const token = await this.getToken();
+
+    const query = encodeURIComponent(
+      `'${parentFolderId}' in parents and name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
+    );
+    const url = `${DRIVE_BASE}/files?q=${query}&fields=files(id)`;
+
+    const resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!resp.ok) throw new Error(`Drive search error: ${resp.status}`);
+    const data = (await resp.json()) as { files: { id: string }[] };
+
+    if (data.files && data.files.length > 0) {
+      return data.files[0].id;
+    }
+
+    // Create folder
+    const createResp = await fetch(`${DRIVE_BASE}/files`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: [parentFolderId],
+      }),
+    });
+    if (!createResp.ok) throw new Error(`Drive folder create error: ${createResp.status} ${await createResp.text()}`);
+    const createdData = (await createResp.json()) as { id: string };
+    return createdData.id;
   }
 }

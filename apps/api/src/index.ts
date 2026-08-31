@@ -14,6 +14,7 @@ import { eventsRouter } from './routes/events';
 import { adminRouter } from './routes/admin';
 import { membersRouter } from './routes/members';
 import { mousRouter } from './routes/mous';
+import { filesRouter } from './routes/files';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -32,6 +33,7 @@ app.route('/api/v1/events', eventsRouter);
 app.route('/api/v1/admin', adminRouter);
 app.route('/api/v1/members', membersRouter);
 app.route('/api/v1/mous', mousRouter);
+app.route('/api/v1/files', filesRouter);
 
 // 404 handler
 app.notFound((c) =>

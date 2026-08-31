@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -22,10 +22,13 @@ import {
   Clock,
   Layers,
   Sparkles,
+  Download,
+  Loader2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { apiGet, API_BASE } from "@/lib/api";
 
 const DEPT_META: Record<
   string,
@@ -486,24 +489,251 @@ export default function DepartmentDeskPage() {
         </div>
       )}
 
-      {/* Department Resource Files Card */}
-      <Card className="glass-panel border-slate-800">
-        <CardHeader>
-          <CardTitle className="text-lg text-white">Departmental Files & Google Drive Synchronization</CardTitle>
+      {/* Department Resource Files Card — Interactive */}
+      <DepartmentFilesSection departmentId={deptKey} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Interactive Google Drive File Manager Component                     */
+/* ------------------------------------------------------------------ */
+interface DriveFileItem {
+  id: string;
+  name: string;
+  mimeType: string;
+  size?: string;
+  createdTime?: string;
+  modifiedTime?: string;
+}
+
+function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
+  const [files, setFiles] = useState<DriveFileItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchFiles = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiGet<{ files: DriveFileItem[] }>(`/api/v1/files/list?departmentId=${departmentId}`);
+      setFiles(data.files || []);
+    } catch (err: any) {
+      setError(err.message || "Failed to load files");
+    } finally {
+      setLoading(false);
+    }
+  }, [departmentId]);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    setUploadMsg(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("departmentId", departmentId);
+
+      const token = typeof window !== "undefined" ? sessionStorage.getItem("gcc_session_token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      // Fetch CSRF token
+      try {
+        const csrfResp = await fetch(`${API_BASE}/api/v1/auth/csrf-token`, {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        if (csrfResp.ok) {
+          const csrfData = await csrfResp.json();
+          if (csrfData?.data?.csrfToken) {
+            headers["X-CSRF-Token"] = csrfData.data.csrfToken;
+          }
+        }
+      } catch {}
+
+      const resp = await fetch(`${API_BASE}/api/v1/files/upload`, {
+        method: "POST",
+        credentials: "include",
+        headers,
+        body: formData,
+      });
+      const result = await resp.json();
+      if (!resp.ok || !result.success) {
+        throw new Error(result.error?.message || "Upload failed");
+      }
+      setUploadMsg(`✓ ${file.name} uploaded successfully`);
+      await fetchFiles();
+    } catch (err: any) {
+      setUploadMsg(`✗ ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownload = (fileId: string, fileName: string) => {
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("gcc_session_token") : null;
+    // Open a download link — the API proxies the Drive file securely
+    const url = `${API_BASE}/api/v1/files/download/${fileId}` + (token ? `?token=${encodeURIComponent(token)}` : "");
+    window.open(url, "_blank");
+  };
+
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile) handleUpload(droppedFile);
+    },
+    [departmentId]
+  );
+
+  const formatSize = (bytes?: string) => {
+    if (!bytes) return "—";
+    const b = parseInt(bytes, 10);
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  return (
+    <Card className="glass-panel border-slate-800">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-lg text-white">Departmental Files & Google Drive</CardTitle>
           <CardDescription className="text-xs">
-            Private drive links are proxied securely through Cloudflare Workers. Access is recorded in Audit Logs.
+            Files are securely proxied through Cloudflare Workers. All access is audit-logged.
           </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="p-12 text-center space-y-3">
-            <UploadCloud className="w-10 h-10 text-slate-500 mx-auto" />
-            <h4 className="text-sm font-semibold text-white">Department Folder Ready</h4>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs gap-1.5"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
+          Upload File
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleUpload(f);
+            e.target.value = "";
+          }}
+        />
+      </CardHeader>
+      <CardContent>
+        {uploadMsg && (
+          <div
+            className={`mb-4 p-2.5 rounded-lg text-xs font-medium ${
+              uploadMsg.startsWith("✓")
+                ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                : "bg-red-500/10 border border-red-500/30 text-red-400"
+            }`}
+          >
+            {uploadMsg}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="p-12 text-center">
+            <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto" />
+            <p className="text-xs text-slate-400 mt-3">Loading department files…</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center space-y-2">
+            <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
+            <p className="text-xs text-red-400">{error}</p>
+            <Button variant="outline" size="sm" className="text-xs" onClick={fetchFiles}>
+              Retry
+            </Button>
+          </div>
+        ) : files.length === 0 ? (
+          <div
+            className={`p-12 text-center space-y-3 border-2 border-dashed rounded-xl transition-colors ${
+              dragOver ? "border-blue-500 bg-blue-500/5" : "border-slate-800"
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+          >
+            <UploadCloud className={`w-10 h-10 mx-auto ${dragOver ? "text-blue-400" : "text-slate-500"}`} />
+            <h4 className="text-sm font-semibold text-white">No Files Yet</h4>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Documents, manuscripts, and media assets will appear here once uploaded via the Google Drive client.
+              Drag & drop files here, or click <strong>Upload File</strong> above to add documents,
+              images, or media assets to this department&apos;s folder.
             </p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        ) : (
+          <div
+            className={`space-y-1 ${
+              dragOver ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-950 rounded-lg" : ""
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+          >
+            {/* Table header */}
+            <div className="grid grid-cols-12 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+              <span className="col-span-6">Name</span>
+              <span className="col-span-2">Type</span>
+              <span className="col-span-2">Size</span>
+              <span className="col-span-2 text-right">Action</span>
+            </div>
+
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="grid grid-cols-12 gap-2 items-center px-3 py-2.5 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors"
+              >
+                <div className="col-span-6 flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span className="text-xs text-white truncate" title={file.name}>
+                    {file.name}
+                  </span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[10px] text-slate-400 truncate">
+                    {file.mimeType?.split("/").pop()?.toUpperCase() || "FILE"}
+                  </span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[10px] text-slate-400">{formatSize(file.size)}</span>
+                </div>
+                <div className="col-span-2 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[10px] gap-1 text-blue-400 hover:text-blue-300"
+                    onClick={() => handleDownload(file.id, file.name)}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
