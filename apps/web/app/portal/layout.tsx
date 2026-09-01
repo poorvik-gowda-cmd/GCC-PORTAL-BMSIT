@@ -145,14 +145,16 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#050608] flex flex-col md:flex-row text-white">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 border-r border-slate-800/80 bg-slate-900/60 p-5 space-y-6 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-64 border-r border-slate-800/80 bg-[#080a0f]/90 p-5 space-y-6 flex flex-col justify-between shrink-0">
         <div className="space-y-6">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/20">
-              GCC
-            </div>
+            <img
+              src="/images/logo/gcc-logo.png"
+              alt="GCC Logo"
+              className="h-10 w-auto object-contain shrink-0"
+            />
             <div>
               <span className="font-bold text-white text-sm block">Member Portal</span>
               <span className="text-[10px] text-slate-400">BMSIT&M Internal</span>

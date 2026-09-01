@@ -15,20 +15,16 @@ import {
   FileText,
   UploadCloud,
   QrCode,
-  ArrowRight,
   ExternalLink,
-  Plus,
   AlertCircle,
-  Clock,
-  Layers,
-  Sparkles,
-  Download,
   Loader2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { apiGet, API_BASE } from "@/lib/api";
+
+const DRIVE_ROOT_URL = "https://drive.google.com/drive/u/0/folders/1LafIbcge-2_pTd2KROcZ_X6wn9c_j9UT";
 
 const DEPT_META: Record<
   string,
@@ -43,49 +39,49 @@ const DEPT_META: Record<
   EXECUTIVE_COUNCIL: {
     name: "Executive Council Desk",
     badge: "LEADERSHIP & GOVERNANCE",
-    description: "Central command desk for GCC Presidents and Executive Members to oversee all high-level approvals, global task summaries, and legal MoUs.",
+    description: "Central command desk for GCC Presidents and Executive Members to oversee global task allocation and legal MoUs.",
     icon: ShieldCheck,
     color: "text-amber-400 border-amber-500/30",
   },
   RESEARCH_PUBLICATION: {
     name: "Research & Publication Desk",
     badge: "RESEARCH & KNOWLEDGE",
-    description: "Academic knowledge hub for tracking research papers, joint international publications, manuscript submissions, and collaborative research documentation.",
+    description: "Academic knowledge hub for managing collaborative research documentation, papers, and Google Drive archives.",
     icon: FileText,
     color: "text-indigo-400 border-indigo-500/30",
   },
   EVENTS_OPERATIONS: {
     name: "Events & Operations Desk",
     badge: "EVENT LOGISTICS & OPS",
-    description: "Operational management hub for event management shortcuts, live registration responses, attendance tracking, and feedback links.",
+    description: "Operational management hub for candidate registration rosters, attendance tracking, and feedback tools.",
     icon: Calendar,
     color: "text-blue-400 border-blue-500/30",
   },
   TECHNICAL: {
     name: "Technical Desk",
     badge: "DIGITAL & SYSTEMS",
-    description: "Tech operations desk for web/system projects tracker, technical issue board, QR code registries, and digital infrastructure status.",
+    description: "Tech operations desk for event creation, web management, and dynamic QR code registries.",
     icon: Globe,
     color: "text-cyan-400 border-cyan-500/30",
   },
   MARKETING: {
     name: "Marketing Desk",
     badge: "PROMOTIONS & OUTREACH",
-    description: "Campaign operations desk for campaign schedules, public registration links, and promotional outreach tasks.",
+    description: "Campaign operations desk for event poster QR registries, public schedules, and outreach materials.",
     icon: Users,
     color: "text-emerald-400 border-emerald-500/30",
   },
   DESIGN: {
     name: "Design Desk",
     badge: "CREATIVE & BRANDING",
-    description: "Visual design workspace for poster/banner creative requests, brand guidelines, and design asset status.",
+    description: "Visual design workspace for managing GCC design assets and Google Drive creative archives.",
     icon: Palette,
     color: "text-purple-400 border-purple-500/30",
   },
   PHOTOGRAPHY: {
     name: "Photography Desk",
     badge: "MEDIA ARCHIVE & COVERAGE",
-    description: "Media coverage desk for event coverage calendar, video archives, and photo drive references.",
+    description: "Media coverage desk for event coverage scheduling, photo galleries, and video drive archives.",
     icon: Camera,
     color: "text-rose-400 border-rose-500/30",
   },
@@ -107,7 +103,7 @@ export default function DepartmentDeskPage() {
   const Icon = meta.icon;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-white">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -118,10 +114,18 @@ export default function DepartmentDeskPage() {
           <p className="text-xs text-slate-400 mt-1 max-w-2xl">{meta.description}</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={DRIVE_ROOT_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> Open {meta.name.replace(" Desk", "")} Drive
+          </a>
           <Link href="/portal/tasks">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <CheckSquare className="w-3.5 h-3.5" /> Department Task Tracker
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs border-slate-800 text-slate-200">
+              <CheckSquare className="w-3.5 h-3.5" /> Department Tasks
             </Button>
           </Link>
         </div>
@@ -130,404 +134,205 @@ export default function DepartmentDeskPage() {
       {/* ── 1. EXECUTIVE COUNCIL DESK ── */}
       {deptKey === "EXECUTIVE_COUNCIL" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-amber-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-400" /> High-Level Approvals & Governance
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Executive decisions and leadership approval controls across GCC.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/portal/tasks" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Global Task Summary & Allocation</h4>
+          <Link href="/portal/tasks" className="block">
+            <Card className="glass-panel border-amber-500/30 hover:border-amber-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-amber-400" /> Global Task Summary & Allocation
+                  </span>
                   <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">6 DEPARTMENTS</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Delegate tasks across all departments and monitor execution progress.</p>
-              </Link>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Delegate tasks across all departments, set deadlines, and monitor execution progress across the council.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-              <Link href="/collaborations" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Legal MoU Document References</h4>
+          <Link href="/collaborations" className="block">
+            <Card className="glass-panel border-emerald-500/30 hover:border-emerald-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-emerald-400" /> Legal MoU Document References
+                  </span>
                   <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">INSTITUTIONAL</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Access legal contracts, partner university MoUs, and fellowship agreements.</p>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Executive Approval Status</CardTitle>
-              <CardDescription className="text-xs">Active oversight metrics</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>MoU Signatures Verified</span>
-                <span className="font-bold text-emerald-400">Synced to Drive</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Task Allocation Authority</span>
-                <span className="font-bold text-amber-400">Global Read / Write / Remark</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Presidential Remarks</span>
-                <span className="font-bold text-blue-400">Enabled on All Tasks</span>
-              </div>
-            </CardContent>
-          </Card>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Access legal contracts, partner university MoUs, fellowship agreements, and official institutional documentation.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         </div>
       )}
 
-      {/* ── 2. RESEARCH & PUBLICATION DESK ── */}
-      {deptKey === "RESEARCH_PUBLICATION" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-indigo-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-400" /> Research Papers & Publication Pipeline
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Track ongoing research, manuscript submissions, and joint international publications.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Research Paper Tracker</h4>
-                  <Badge variant="outline" className="text-[9px] text-indigo-400 border-indigo-500/30">PIPELINE</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Track submitted, under-review, and published research papers with co-author details.</p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">International Collaboration Docs</h4>
-                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">JOINT RESEARCH</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Archive joint research documents, co-authored papers, and partner university submissions.</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Publication Status Overview</CardTitle>
-              <CardDescription className="text-xs">Research progress metrics</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Document Repository</span>
-                <span className="font-bold text-indigo-400">Google Drive Synced</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Journal Submissions</span>
-                <span className="font-bold text-amber-400">Track via Pipeline</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Collaboration Network</span>
-                <span className="font-bold text-emerald-400">Active MoU Partners</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* ── 2. EVENTS & OPERATIONS DESK ── */}
-      {deptKey === "EVENTS_OPERATIONS" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-blue-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-400" /> Event Candidate Registrations & Attendance Tools
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Operational tools for registered participant rosters, attendance check-in forms, and feedback collection.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/portal/registrations" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Event Candidate Registrations Hub & CSV Export</h4>
-                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">CANDIDATE DATA</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">View live registered candidates for all events, monitor capacity, and export CSV rosters.</p>
-              </Link>
-
-              <a
-                href="https://forms.google.com"
-                target="_blank"
-                rel="noreferrer"
-                className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors group cursor-pointer"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
-                    Google Forms Generator (Attendance & Feedback) <ExternalLink className="w-3 h-3 text-slate-500" />
-                  </h4>
-                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">FORMS TOOL</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Generate and manage official Google Forms solely for event attendance check-in and participant feedback surveys.</p>
-              </a>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Operations Readiness</CardTitle>
-              <CardDescription className="text-xs">Logistics & venue status</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Auditorium & Venue Bookings</span>
-                <span className="font-semibold text-blue-400">Confirmed</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Participant Check-In Systems</span>
-                <span className="font-semibold text-emerald-400">Forms & QR Ready</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Event Creation Access</span>
-                <span className="font-semibold text-slate-400">Technical & EC Only</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* ── 3. TECHNICAL DESK ── */}
+      {/* ── 2. TECHNICAL DESK ── */}
       {deptKey === "TECHNICAL" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-cyan-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <Globe className="w-5 h-5 text-cyan-400" /> Web & System Projects Tracker
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Digital infrastructure, technical issue board, and developer tools.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/portal/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Event Registration & Creation Desk</h4>
-                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">FULL ACCESS</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Create new events, toggle draft/published, open/close registrations, and edit details.</p>
-              </Link>
+          <Link href="/portal/events" className="block">
+            <Card className="glass-panel border-cyan-500/30 hover:border-cyan-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-cyan-400" /> Event Registration & Creation Desk
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">FULL ACCESS</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Create new events, toggle draft/published status, open or close public registrations, and manage capacity.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-              <Link href="/portal/qr" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Dynamic QR Code Registries</h4>
-                  <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">TOOL</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Generate high-res QR codes for event check-in and landing pages.</p>
-              </Link>
+          <Link href="/portal/qr" className="block">
+            <Card className="glass-panel border-blue-500/30 hover:border-blue-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <QrCode className="w-5 h-5 text-blue-400" /> Dynamic QR Code Registries
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">TOOL</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Generate high-resolution QR codes for event check-in desks, poster promotion, and landing pages.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
+      )}
 
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Technical Issue & System Board</h4>
-                  <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">INFRASTRUCTURE</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Monitor API latency, Workers runtime logs, and D1 database queries.</p>
-              </div>
-            </CardContent>
-          </Card>
+      {/* ── 3. EVENTS & OPERATIONS DESK ── */}
+      {deptKey === "EVENTS_OPERATIONS" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Link href="/portal/registrations" className="block">
+            <Card className="glass-panel border-blue-500/30 hover:border-blue-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-400" /> Event Candidate Registrations Hub
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">ROSTER</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  View live candidate rosters for all events, monitor registration limits, and export participant CSV data.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Digital Infrastructure Status</CardTitle>
-              <CardDescription className="text-xs">Cloudflare & Edge stack</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>D1 Database Connection</span>
-                <span className="font-semibold text-emerald-400">Connected (Active)</span>
-              </div>
-              <a 
-                href="https://docs.google.com/spreadsheets/d/1_FZpVwncW3mNOrwp62T4uoIwkBeXYb6ge1BXgARcafM" 
-                target="_blank" 
-                rel="noreferrer"
-                className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-cyan-500/50 flex justify-between items-center transition-colors group cursor-pointer"
-              >
-                <span className="group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
-                  Google Sheets Live Database <ExternalLink className="w-3 h-3 text-slate-500" />
-                </span>
-                <span className="font-semibold text-emerald-400">Synced & Viewable</span>
-              </a>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Turnstile Bot Protection</span>
-                <span className="font-semibold text-emerald-400">Enforced</span>
-              </div>
-            </CardContent>
-          </Card>
+          <a href="https://forms.google.com" target="_blank" rel="noreferrer" className="block">
+            <Card className="glass-panel border-emerald-500/30 hover:border-emerald-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-emerald-400" /> Attendance Check-in & Feedback Tools
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">FORMS TOOL</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Launch Google Forms specifically designed for event attendance check-ins and candidate feedback collection.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </a>
         </div>
       )}
 
       {/* ── 4. MARKETING DESK ── */}
       {deptKey === "MARKETING" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-emerald-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-400" /> Campaign Schedules, Event QR Codes & Links
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Access upcoming event QR codes, registration links, and promotional campaign materials.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/portal/qr" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Event QR Code Registry & Download</h4>
-                  <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">QR CODES</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">View and download high-resolution QR code PNGs for marketing posters and social media.</p>
-              </Link>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link href="/portal/qr" className="block">
+            <Card className="glass-panel border-emerald-500/30 hover:border-emerald-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <QrCode className="w-5 h-5 text-emerald-400" /> Event QR Codes
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">POSTER QR</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Download high-res QR code PNGs for marketing posters and social media outreach.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-              <Link href="/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Public Scheduled Events Calendar</h4>
-                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">UPCOMING</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">View upcoming public event schedules and copy direct registration links.</p>
-              </Link>
+          <Link href="/events" className="block">
+            <Card className="glass-panel border-cyan-500/30 hover:border-cyan-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-cyan-400" /> Public Event Schedule
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">SCHEDULE</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  View published event schedules and copy direct registration URLs for promotional campaigns.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-              <Link href="/portal/events" className="block p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Portal Event Desk (Read-Only)</h4>
-                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">READ-ONLY</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">View internal details and schedule timelines for all registered events.</p>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Outreach Guidelines</CardTitle>
-              <CardDescription className="text-xs">Official GCC Branding</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Official Tagline</span>
-                <span className="font-semibold text-emerald-400">Global Collaboration Cell BMSIT&M</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Official Hashtag</span>
-                <span className="font-semibold text-emerald-400">#GCCBMSIT #GlobalExcellence</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Event Creation Access</span>
-                <span className="font-semibold text-slate-400">Technical & EC Only</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Link href="/portal/events" className="block">
+            <Card className="glass-panel border-blue-500/30 hover:border-blue-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <FolderGit2 className="w-5 h-5 text-blue-400 text-xs" /> Event Desk (Read-Only)
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-blue-400 border-blue-500/30">VIEW ONLY</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Inspect internal schedules and upcoming event timelines.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         </div>
       )}
 
-      {/* ── 5. DESIGN DESK ── */}
-      {deptKey === "DESIGN" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-purple-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <Palette className="w-5 h-5 text-purple-400" /> Creative Requests & Design Assets
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Poster/banner creative requests and design asset status.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Poster & Banner Creative Requests</h4>
-                  <Badge variant="outline" className="text-[9px] text-purple-400 border-purple-500/30">WORKFLOW</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Receive banner dimensions, text copy, and deadlines from Events & Operations.</p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Design & Vector Asset Storage</h4>
-                  <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">FIGMA / DRIVE</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Figma templates and vector assets stored in GCC Google Drive workspace.</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Brand Palette & Standards</CardTitle>
-              <CardDescription className="text-xs">Official Colors</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Primary Color</span>
-                <span className="font-semibold text-blue-400">Electric Blue (#2563EB)</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Secondary Accent</span>
-                <span className="font-semibold text-purple-400">Deep Violet (#7C3AED)</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* ── 6. PHOTOGRAPHY DESK ── */}
+      {/* ── 5. PHOTOGRAPHY DESK ── */}
       {deptKey === "PHOTOGRAPHY" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-panel border-rose-500/30">
-            <CardHeader>
-              <CardTitle className="text-base text-white flex items-center gap-2">
-                <Camera className="w-5 h-5 text-rose-400" /> Event Coverage Calendar & Media Archive
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Photography slots, video archives, and media drive references.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Event Coverage Photography Calendar</h4>
+          <Link href="/portal/events" className="block">
+            <Card className="glass-panel border-rose-500/30 hover:border-rose-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Camera className="w-5 h-5 text-rose-400" /> Event Coverage Photography Calendar
+                  </span>
                   <Badge variant="outline" className="text-[9px] text-rose-400 border-rose-500/30">SCHEDULE</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Assign photographers and videographers to upcoming GCC event dates.</p>
-              </div>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Check upcoming event dates to assign photographers and videographers for media coverage.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-              <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-white">Google Drive Media Archive</h4>
-                  <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">DRIVE ARCHIVE</Badge>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5">Upload high-res RAW photos and edited recap videos into GCC Drive folders.</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Coverage Protocol</CardTitle>
-              <CardDescription className="text-xs">Event Photo Uploads</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>RAW Archive Storage</span>
-                <span className="font-semibold text-rose-400">Google Drive Service Account</span>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-                <span>Turnaround Time</span>
-                <span className="font-semibold text-slate-300">24 Hours Post-Event</span>
-              </div>
-            </CardContent>
-          </Card>
+          <a href={DRIVE_ROOT_URL} target="_blank" rel="noreferrer" className="block">
+            <Card className="glass-panel border-amber-500/30 hover:border-amber-500/60 transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <FolderGit2 className="w-5 h-5 text-amber-400" /> Drive Media Archive Folder
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">RAW & RECAPS</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Open the official Photography Google Drive folder to upload high-res RAW photos and recap videos.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </a>
         </div>
       )}
 
-      {/* Department Resource Files Card — Interactive */}
+      {/* Department Resource Files Card — Interactive File Manager */}
       <DepartmentFilesSection departmentId={deptKey} />
     </div>
   );
@@ -617,9 +422,8 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
     }
   };
 
-  const handleDownload = (fileId: string, fileName: string) => {
+  const handleDownload = (fileId: string) => {
     const token = typeof window !== "undefined" ? sessionStorage.getItem("gcc_session_token") : null;
-    // Open a download link — the API proxies the Drive file securely
     const url = `${API_BASE}/api/v1/files/download/${fileId}` + (token ? `?token=${encodeURIComponent(token)}` : "");
     window.open(url, "_blank");
   };
@@ -647,18 +451,18 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="text-lg text-white">Departmental Files & Google Drive</CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-xs text-slate-400">
             Files are securely proxied through Cloudflare Workers. All access is audit-logged.
           </CardDescription>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="text-xs gap-1.5"
+          className="text-xs gap-1.5 border-slate-800 text-slate-200"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
         >
-          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
+          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5 text-blue-400" />}
           Upload File
         </Button>
         <input
@@ -694,7 +498,7 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
           <div className="p-8 text-center space-y-2">
             <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
             <p className="text-xs text-red-400">{error}</p>
-            <Button variant="outline" size="sm" className="text-xs" onClick={fetchFiles}>
+            <Button variant="outline" size="sm" className="text-xs border-slate-800" onClick={fetchFiles}>
               Retry
             </Button>
           </div>
@@ -711,10 +515,9 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
             onDrop={onDrop}
           >
             <UploadCloud className={`w-10 h-10 mx-auto ${dragOver ? "text-blue-400" : "text-slate-500"}`} />
-            <h4 className="text-sm font-semibold text-white">No Files Yet</h4>
+            <h4 className="text-sm font-semibold text-white">No Files Uploaded Yet</h4>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Drag & drop files here, or click <strong>Upload File</strong> above to add documents,
-              images, or media assets to this department&apos;s folder.
+              Drag & drop files here, or click <strong>Upload File</strong> above to add documents to this department&apos;s Google Drive branch.
             </p>
           </div>
         ) : (
@@ -729,7 +532,6 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
           >
-            {/* Table header */}
             <div className="grid grid-cols-12 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
               <span className="col-span-6">Name</span>
               <span className="col-span-2">Type</span>
@@ -748,22 +550,19 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
                     {file.name}
                   </span>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-[10px] text-slate-400 truncate">
-                    {file.mimeType?.split("/").pop()?.toUpperCase() || "FILE"}
-                  </span>
+                <div className="col-span-2 text-[11px] text-slate-400 truncate">
+                  {file.mimeType.split("/").pop() || "file"}
                 </div>
-                <div className="col-span-2">
-                  <span className="text-[10px] text-slate-400">{formatSize(file.size)}</span>
+                <div className="col-span-2 text-[11px] text-slate-400">
+                  {formatSize(file.size)}
                 </div>
-                <div className="col-span-2 flex justify-end">
+                <div className="col-span-2 text-right">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[10px] gap-1 text-blue-400 hover:text-blue-300"
-                    onClick={() => handleDownload(file.id, file.name)}
+                    className="h-7 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                    onClick={() => handleDownload(file.id)}
                   >
-                    <Download className="w-3.5 h-3.5" />
                     Download
                   </Button>
                 </div>
