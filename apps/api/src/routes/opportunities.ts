@@ -43,7 +43,9 @@ opportunitiesRouter.post(
     const canPublish =
       user.roles.includes('SYSTEM_SUPER_ADMIN') ||
       user.roles.includes('EXECUTIVE_COUNCIL') ||
-      user.departments.includes('RESEARCH_PUBLICATION');
+      user.departments.includes('EXECUTIVE_COUNCIL' as any) ||
+      user.departments.includes('RESEARCH_PUBLICATION' as any) ||
+      user.departments.includes('RESEARCH' as any);
 
     if (!canPublish) {
       return c.json(
