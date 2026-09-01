@@ -49,15 +49,15 @@ export class DriveClient {
    * Used for proxying private files through the Worker.
    * NEVER expose the direct Drive share link to the client.
    */
-  async downloadFile(fileId: string): Promise<{ content: ArrayBuffer; mimeType: string; name: string }> {
+  async downloadFile(fileId: string): Promise<{ content: ArrayBuffer; mimeType: string; name: string; parents?: string[] }> {
     const token = await this.getToken();
 
     // Get file metadata first
-    const metaResp = await fetch(`${DRIVE_BASE}/files/${fileId}?fields=name,mimeType`, {
+    const metaResp = await fetch(`${DRIVE_BASE}/files/${fileId}?fields=name,mimeType,parents`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!metaResp.ok) throw new Error(`Drive metadata error: ${metaResp.status}`);
-    const meta = (await metaResp.json()) as { name: string; mimeType: string };
+    const meta = (await metaResp.json()) as { name: string; mimeType: string; parents?: string[] };
 
     // Download content
     const contentResp = await fetch(`${DRIVE_BASE}/files/${fileId}?alt=media`, {
@@ -66,7 +66,7 @@ export class DriveClient {
     if (!contentResp.ok) throw new Error(`Drive download error: ${contentResp.status}`);
     const content = await contentResp.arrayBuffer();
 
-    return { content, mimeType: meta.mimeType, name: meta.name };
+    return { content, mimeType: meta.mimeType, name: meta.name, parents: meta.parents };
   }
 
   /**

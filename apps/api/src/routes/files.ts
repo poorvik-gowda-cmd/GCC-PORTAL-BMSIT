@@ -16,24 +16,57 @@ export const filesRouter = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 filesRouter.use('*', requireAuth);
 
+/**
+ * Standardize department IDs to match the required 4-branch Google Drive architecture:
+ * 1. PHOTOGRAPHY (Photography & Visual Media)
+ * 2. DESIGN (Design)
+ * 3. EXECUTIVE_COUNCIL (Executive Council — strictly isolated)
+ * 4. RESEARCH_PUBLICATION (Research)
+ */
+function normalizeDepartmentId(raw: string): string {
+  const upper = raw.toUpperCase().trim().replace(/-/g, '_');
+  if (upper === 'RESEARCH' || upper === 'RESEARCH_PUBLICATION') return 'RESEARCH_PUBLICATION';
+  if (upper === 'PHOTOGRAPHY' || upper === 'PHOTOGRAPHY_VISUAL_MEDIA' || upper === 'MEDIA') return 'PHOTOGRAPHY';
+  if (upper === 'DESIGN' || upper === 'DESIGN_DESK') return 'DESIGN';
+  if (upper === 'EXECUTIVE_COUNCIL' || upper === 'EC') return 'EXECUTIVE_COUNCIL';
+  return upper;
+}
+
 // ----------------------------------------------------------
-// 1. GET /api/v1/files/list — List department files
+// 1. GET /api/v1/files/list — List department files from Drive
 // ----------------------------------------------------------
 filesRouter.get('/list', async (c) => {
   const user = c.get('user');
-  const departmentId = c.req.query('departmentId');
+  const rawDepartmentId = c.req.query('departmentId');
 
-  if (!departmentId) {
+  if (!rawDepartmentId) {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing departmentId' } }, 400);
   }
 
-  // Permission Check: Super Admins and Executive Council can view any department folder.
-  // Regular members can only view their own department.
-  const isPrivileged = user.roles.includes('SYSTEM_SUPER_ADMIN') || user.roles.includes('EXECUTIVE_COUNCIL');
-  const isMember = user.departments.includes(departmentId as any);
+  const departmentId = normalizeDepartmentId(rawDepartmentId);
 
-  if (!isPrivileged && !isMember) {
-    return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied to department files' } }, 403);
+  const isPrivileged = user.roles.includes('SYSTEM_SUPER_ADMIN') || user.roles.includes('EXECUTIVE_COUNCIL');
+  const isMember = user.departments.includes(departmentId as any) || user.departments.includes(rawDepartmentId as any);
+
+  // --- ACCESS CONTROL GOVERNANCE ---
+  // 1. EXECUTIVE COUNCIL: Strictly isolated. Only Executive Council members and Super Admin can view/access these files.
+  if (departmentId === 'EXECUTIVE_COUNCIL') {
+    if (!isPrivileged && !isMember) {
+      return c.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'Access to Executive Council files is restricted exclusively to Executive Council members.' } },
+        403
+      );
+    }
+  }
+  // 2. PHOTOGRAPHY, DESIGN, RESEARCH_PUBLICATION: All relevant portal users can view/access the uploaded files.
+  else if (['PHOTOGRAPHY', 'DESIGN', 'RESEARCH_PUBLICATION'].includes(departmentId)) {
+    // All authenticated portal users are permitted to view/access these branches.
+  }
+  // 3. Fallback for other departments: Department members, EC, and Super Admin can view.
+  else {
+    if (!isPrivileged && !isMember) {
+      return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied to department files' } }, 403);
+    }
   }
 
   try {
@@ -42,7 +75,7 @@ filesRouter.get('/list', async (c) => {
       privateKey: c.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
     });
 
-    // Dynamically resolve/create the subfolder for the department
+    // Dynamically resolve/create the subfolder for the department branch
     const folderId = await drive.findOrCreateFolder(c.env.GOOGLE_DRIVE_ROOT_FOLDER_ID, departmentId);
     const files = await drive.listFiles(folderId);
 
@@ -54,7 +87,7 @@ filesRouter.get('/list', async (c) => {
 });
 
 // ----------------------------------------------------------
-// 2. POST /api/v1/files/upload — Upload file
+// 2. POST /api/v1/files/upload — Upload file to Google Drive branch
 // ----------------------------------------------------------
 filesRouter.post('/upload', async (c) => {
   const user = c.get('user');
@@ -63,18 +96,24 @@ filesRouter.post('/upload', async (c) => {
 
   try {
     const body = await c.req.parseBody();
-    const departmentId = body['departmentId'] as string;
+    const rawDepartmentId = body['departmentId'] as string;
     const fileObj = body['file'];
 
-    if (!departmentId || !fileObj || !(fileObj instanceof File)) {
+    if (!rawDepartmentId || !fileObj || !(fileObj instanceof File)) {
       return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing departmentId or valid file' } }, 400);
     }
 
-    const isPrivileged = user.roles.includes('SYSTEM_SUPER_ADMIN') || user.roles.includes('EXECUTIVE_COUNCIL');
-    const isMember = user.departments.includes(departmentId as any);
+    const departmentId = normalizeDepartmentId(rawDepartmentId);
 
+    const isPrivileged = user.roles.includes('SYSTEM_SUPER_ADMIN') || user.roles.includes('EXECUTIVE_COUNCIL');
+    const isMember = user.departments.includes(departmentId as any) || user.departments.includes(rawDepartmentId as any);
+
+    // Upload Rules: Department team members and EC/SuperAdmin can upload to their respective branch.
     if (!isPrivileged && !isMember) {
-      return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied to upload files' } }, 403);
+      return c.json(
+        { success: false, error: { code: 'FORBIDDEN', message: `Upload access denied. Only ${departmentId.replace('_', ' ')} team members can upload files to this branch.` } },
+        403
+      );
     }
 
     const drive = new DriveClient({
@@ -116,7 +155,20 @@ filesRouter.get('/download/:fileId', async (c) => {
       privateKey: c.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
     });
 
-    const { content, mimeType, name } = await drive.downloadFile(fileId);
+    const isPrivileged = user.roles.includes('SYSTEM_SUPER_ADMIN') || user.roles.includes('EXECUTIVE_COUNCIL') || user.departments.includes('EXECUTIVE_COUNCIL');
+
+    // Get Executive Council folder ID to check strict isolation
+    const ecFolderId = await drive.findOrCreateFolder(c.env.GOOGLE_DRIVE_ROOT_FOLDER_ID, 'EXECUTIVE_COUNCIL');
+
+    const { content, mimeType, name, parents } = await drive.downloadFile(fileId);
+
+    // Enforce strict isolation: Executive Council files can only be accessed by Executive Council members
+    if (parents && parents.includes(ecFolderId) && !isPrivileged) {
+      return c.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'Access to Executive Council files is restricted exclusively to Executive Council members.' } },
+        403
+      );
+    }
 
     await auditLog(c.env.DB, user.id, 'ADMIN_ACTION', { action: 'file_downloaded', fileId, fileName: name }, ip, ua);
 
