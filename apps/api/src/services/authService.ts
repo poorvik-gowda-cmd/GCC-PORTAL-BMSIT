@@ -232,6 +232,18 @@ async function loadUserProfile(db: D1Database, user: DbUser): Promise<UserProfil
     permissions = permissions.filter((p) => !['EVENT_CREATE', 'EVENT_EDIT', 'EVENT_PUBLISH'].includes(p));
   }
 
+  // 4. DEPARTMENT_LEAD role: Grant departmental task assignment & viewing permissions
+  if (roles.includes('DEPARTMENT_LEAD' as any) || roles.includes('DEPARTMENT_HEAD' as any)) {
+    const leadPerms: Permission[] = [
+      'TASK_ASSIGN_DEPARTMENT',
+      'TASK_VIEW_DEPARTMENT',
+      'TASK_UPDATE_OWN',
+    ];
+    for (const p of leadPerms) {
+      if (!permissions.includes(p)) permissions.push(p);
+    }
+  }
+
   return {
     id: user.id,
     email: user.email,

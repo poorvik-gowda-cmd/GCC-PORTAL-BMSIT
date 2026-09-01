@@ -55,7 +55,9 @@ export default function TaskTrackerPage() {
           u.permissions?.includes("TASK_ASSIGN_GLOBAL") ||
           u.permissions?.includes("TASK_ASSIGN_DEPARTMENT") ||
           u.roles?.includes("SYSTEM_SUPER_ADMIN") ||
-          u.roles?.includes("EXECUTIVE_COUNCIL");
+          u.roles?.includes("EXECUTIVE_COUNCIL") ||
+          u.roles?.includes("DEPARTMENT_LEAD") ||
+          u.roles?.includes("DEPARTMENT_HEAD");
         setCanAssignTask(allowed);
       })
       .catch(() => {});

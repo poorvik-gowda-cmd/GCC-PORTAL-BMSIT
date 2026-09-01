@@ -82,21 +82,56 @@ export default function Contact() {
             <motion.div variants={textReveal} className="mt-14 space-y-8">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">
-                  Email
+                  Email & Address
                 </p>
                 <p className="mt-2 text-xl text-white/80">
-                  gcc@bsmit.in
+                  gcc@bmsit.in
+                </p>
+                <p className="mt-1 text-sm text-white/50">
+                  BMS Institute of Technology and Management, Bengaluru
                 </p>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">
-                  Location
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-3">
+                  Social Connections & Community
                 </p>
-                <p className="mt-2 text-xl text-white/80">
-                  BMS Institute of Technology and Management
-                  <br />Bengaluru, Karnataka
-                </p>
+
+                <div className="flex flex-wrap gap-4">
+                  <a
+                    href="https://www.instagram.com/gcc_bms?igsi=NTB2NnZmYTc1eXdh"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3.5 transition-all hover:border-[#68d32f] hover:bg-white/5"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white font-bold text-lg">
+                      📸
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-white group-hover:text-[#68d32f] transition-colors flex items-center gap-1">
+                        Instagram <span className="text-xs text-white/40">↗</span>
+                      </p>
+                      <p className="text-[11px] text-white/50">@gcc_bms</p>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://www.instagram.com/gcc_bms?igsi=NTB2NnZmYTc1eXdh"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3.5 transition-all hover:border-[#68d32f] hover:bg-white/5"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-lg">
+                      in
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-white group-hover:text-[#68d32f] transition-colors flex items-center gap-1">
+                        LinkedIn Network <span className="text-xs text-white/40">↗</span>
+                      </p>
+                      <p className="text-[11px] text-white/50">GCC BMSIT&M</p>
+                    </div>
+                  </a>
+                </div>
               </div>
             </motion.div>
           </motion.div>
