@@ -44,7 +44,7 @@ export default function Contact() {
           className="mb-10 flex items-center gap-4"
         >
           <span className="text-[11px] uppercase tracking-[0.25em] text-[#68d32f]">
-            Get in touch
+            Get in touch & Follow Us
           </span>
 
           <motion.div 
@@ -56,9 +56,9 @@ export default function Contact() {
           />
         </motion.div>
 
-        <div className="grid gap-16 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid gap-12 lg:grid-cols-2 items-center">
 
-          {/* Left */}
+          {/* Left info column */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -74,137 +74,101 @@ export default function Contact() {
               variants={textReveal}
               className="mt-10 max-w-lg text-lg leading-8 text-white/50"
             >
-              Have an idea, collaboration proposal or opportunity?
-              Connect with the Global Collaboration Cell and let's
-              create something meaningful together.
+              Have an idea, collaboration proposal, or research opportunity?
+              Follow our official channels or reach out directly to the Global Collaboration Cell.
             </motion.p>
 
-            <motion.div variants={textReveal} className="mt-14 space-y-8">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">
-                  Email & Address
+            <motion.div variants={textReveal} className="mt-12 space-y-6">
+              <div className="p-6 rounded-2xl border border-white/10 bg-[#0a0c0a]">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#68d32f]">
+                  Official Email
                 </p>
-                <p className="mt-2 text-xl text-white/80">
+                <p className="mt-2 text-xl font-semibold text-white">
                   gcc@bmsit.in
-                </p>
-                <p className="mt-1 text-sm text-white/50">
-                  BMS Institute of Technology and Management, Bengaluru
                 </p>
               </div>
 
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-3">
-                  Social Connections & Community
+              <div className="p-6 rounded-2xl border border-white/10 bg-[#0a0c0a]">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#68d32f]">
+                  Campus Location
                 </p>
-
-                <div className="flex flex-wrap gap-4">
-                  <a
-                    href="https://www.instagram.com/gcc_bms?igsi=NTB2NnZmYTc1eXdh"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3.5 transition-all hover:border-[#68d32f] hover:bg-white/5"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white font-bold text-lg">
-                      📸
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-white group-hover:text-[#68d32f] transition-colors flex items-center gap-1">
-                        Instagram <span className="text-xs text-white/40">↗</span>
-                      </p>
-                      <p className="text-[11px] text-white/50">@gcc_bms</p>
-                    </div>
-                  </a>
-
-                  <a
-                    href="https://www.instagram.com/gcc_bms?igsi=NTB2NnZmYTc1eXdh"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3.5 transition-all hover:border-[#68d32f] hover:bg-white/5"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-lg">
-                      in
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-white group-hover:text-[#68d32f] transition-colors flex items-center gap-1">
-                        LinkedIn Network <span className="text-xs text-white/40">↗</span>
-                      </p>
-                      <p className="text-[11px] text-white/50">GCC BMSIT&M</p>
-                    </div>
-                  </a>
-                </div>
+                <p className="mt-2 text-lg text-white/90">
+                  BMS Institute of Technology and Management
+                </p>
+                <p className="mt-1 text-xs text-white/50">
+                  Avalahalli, Yelahanka, Bengaluru, Karnataka 560064
+                </p>
               </div>
             </motion.div>
           </motion.div>
 
-          {/* Form */}
-          <motion.form
+          {/* Right column: 2 Large Prominent Social Cards */}
+          <motion.div
             initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.2, delay: 0.4, ease: elegantEase }}
-            className="rounded-3xl border border-white/5 bg-[#0a0c0a] p-8 md:p-12 shadow-2xl"
+            transition={{ duration: 1.2, delay: 0.3, ease: elegantEase }}
+            className="space-y-6"
           >
-            <div className="grid gap-8 md:grid-cols-2">
-
-              <div>
-                <label className="mb-3 block text-[11px] uppercase tracking-wider text-white/40">
-                  Name
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Your name"
-                  className="w-full border-b border-white/10 bg-transparent py-3 text-base text-white outline-none placeholder:text-white/20 focus:border-[#68d32f] transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="mb-3 block text-[11px] uppercase tracking-wider text-white/40">
-                  Email
-                </label>
-
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full border-b border-white/10 bg-transparent py-3 text-base text-white outline-none placeholder:text-white/20 focus:border-[#68d32f] transition-colors"
-                />
-              </div>
-
-            </div>
-
-            <div className="mt-10">
-              <label className="mb-3 block text-[11px] uppercase tracking-wider text-white/40">
-                Subject
-              </label>
-
-              <input
-                type="text"
-                placeholder="How can we collaborate?"
-                className="w-full border-b border-white/10 bg-transparent py-3 text-base text-white outline-none placeholder:text-white/20 focus:border-[#68d32f] transition-colors"
-              />
-            </div>
-
-            <div className="mt-10">
-              <label className="mb-3 block text-[11px] uppercase tracking-wider text-white/40">
-                Message
-              </label>
-
-              <textarea
-                rows={5}
-                placeholder="Tell us about your idea..."
-                className="w-full resize-none border-b border-white/10 bg-transparent py-3 text-base text-white outline-none placeholder:text-white/20 focus:border-[#68d32f] transition-colors"
-              />
-            </div>
-
-            <button
-              type="submit"
-              data-cursor="BUTTON"
-              className="mt-12 flex items-center gap-8 rounded-full bg-white px-8 py-4 text-sm font-medium text-black transition-transform duration-300 hover:scale-[1.03] hover:bg-[#68d32f]"
+            {/* Instagram Large Card */}
+            <a
+              href="https://www.instagram.com/gcc_bms?igsi=NTB2NnZmYTc1eXdh"
+              target="_blank"
+              rel="noreferrer"
+              className="group block rounded-3xl border border-white/10 bg-[#0a0c0a] p-8 md:p-10 shadow-2xl transition-all duration-500 hover:border-[#68d32f]/60 hover:bg-[#0f140f] hover:shadow-[0_0_50px_rgba(104,211,47,0.15)]"
             >
-              Send Message
-              <span className="text-lg">→</span>
-            </button>
-          </motion.form>
+              <div className="flex items-center justify-between">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white font-bold text-2xl shadow-lg">
+                  📸
+                </div>
+                <span className="text-2xl text-white/30 group-hover:text-[#68d32f] group-hover:translate-x-2 transition-all">
+                  →
+                </span>
+              </div>
+
+              <div className="mt-8">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#68d32f] font-semibold">
+                  INSTAGRAM COMMUNITY
+                </span>
+                <h3 className="mt-2 text-3xl font-bold text-white group-hover:text-[#68d32f] transition-colors">
+                  @gcc_bms
+                </h3>
+                <p className="mt-3 text-sm text-white/60 leading-relaxed">
+                  Follow us for event announcements, recap reels, campus workshops, and international student highlights.
+                </p>
+              </div>
+            </a>
+
+            {/* LinkedIn Large Card */}
+            <a
+              href="https://www.linkedin.com/company/global-collaboration-cell-bmsit-m/"
+              target="_blank"
+              rel="noreferrer"
+              className="group block rounded-3xl border border-white/10 bg-[#0a0c0a] p-8 md:p-10 shadow-2xl transition-all duration-500 hover:border-[#68d32f]/60 hover:bg-[#0f140f] hover:shadow-[0_0_50px_rgba(104,211,47,0.15)]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0077b5] text-white font-bold text-2xl shadow-lg">
+                  in
+                </div>
+                <span className="text-2xl text-white/30 group-hover:text-[#68d32f] group-hover:translate-x-2 transition-all">
+                  →
+                </span>
+              </div>
+
+              <div className="mt-8">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-blue-400 font-semibold">
+                  LINKEDIN PROFESSIONAL NETWORK
+                </span>
+                <h3 className="mt-2 text-2xl font-bold text-white group-hover:text-[#68d32f] transition-colors">
+                  GCC BMSIT&M
+                </h3>
+                <p className="mt-3 text-sm text-white/60 leading-relaxed">
+                  Connect with our official institutional network for research partnerships, global university MoUs, and career opportunities.
+                </p>
+              </div>
+            </a>
+          </motion.div>
+
         </div>
 
         {/* Bottom */}
@@ -216,7 +180,7 @@ export default function Contact() {
           className="mt-24 border-t border-white/5 pt-8"
         >
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">
-            Global Collaboration Cell · BSMIT
+            Global Collaboration Cell · BMSIT&M
           </p>
         </motion.div>
 

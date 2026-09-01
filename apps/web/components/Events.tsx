@@ -19,29 +19,9 @@ interface LiveEvent {
   status?: string;
 }
 
-const pastEventsStatic: LiveEvent[] = [
-  {
-    id: "past-1",
-    title: "GCC Global Academic Summit 2024",
-    date: "Dec 15, 2024",
-    description: "International flagship summit featuring global university leaders, student exchange showcases, and research keynotes.",
-  },
-  {
-    id: "past-2",
-    title: "Cross-Border Research Symposium",
-    date: "Nov 20, 2024",
-    description: "Joint international paper presentations and collaborative student research fellowship exhibitions.",
-  },
-  {
-    id: "past-3",
-    title: "Global Career & Fellowship Expo",
-    date: "Oct 10, 2024",
-    description: "Mentorship workshops with international alumni, Erasmus+ guidance, and global career pathways.",
-  },
-];
-
 export default function Events() {
   const [upcomingEvents, setUpcomingEvents] = useState<LiveEvent[]>(staticEvents);
+  const [pastEvents, setPastEvents] = useState<LiveEvent[]>([]);
   const [activeTab, setActiveTab] = useState<"UPCOMING" | "PREVIOUS">("UPCOMING");
 
   useEffect(() => {
@@ -51,13 +31,27 @@ export default function Events() {
         if (resp.ok) {
           const resData = await resp.json();
           if (resData.success && Array.isArray(resData.data.events) && resData.data.events.length > 0) {
-            const mapped = resData.data.events.map((e: any) => ({
-              id: e.eventId || e.id,
-              title: e.title,
-              description: e.shortDescription || e.fullDescription || e.description,
-              date: e.startDate ? new Date(e.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : e.date || "Upcoming",
-            }));
-            setUpcomingEvents(mapped);
+            const now = new Date();
+            const upcoming: LiveEvent[] = [];
+            const previous: LiveEvent[] = [];
+
+            resData.data.events.forEach((e: any) => {
+              const mapped = {
+                id: e.eventId || e.id,
+                title: e.title,
+                description: e.shortDescription || e.fullDescription || e.description,
+                date: e.startDate ? new Date(e.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : e.date || "Scheduled",
+              };
+              const eventDate = e.endDate ? new Date(e.endDate) : e.startDate ? new Date(e.startDate) : null;
+              if (eventDate && eventDate < now) {
+                previous.push(mapped);
+              } else {
+                upcoming.push(mapped);
+              }
+            });
+
+            if (upcoming.length > 0) setUpcomingEvents(upcoming);
+            setPastEvents(previous);
           }
         }
       } catch (e) {
@@ -121,7 +115,7 @@ export default function Events() {
                 : "border border-white/15 text-white/80 hover:border-[#68d32f] hover:text-white"
             }`}
           >
-            Previous Events & Photos 📸
+            Previous Events & Photos 📸 ({pastEvents.length})
           </button>
         </div>
 
@@ -206,79 +200,101 @@ export default function Events() {
           </div>
         )}
 
-        {/* --- PREVIOUS EVENTS & MEDIA DRIVE GRID --- */}
+        {/* --- PREVIOUS EVENTS GRID (NO MOCK DATA) --- */}
         {activeTab === "PREVIOUS" && (
-          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {pastEventsStatic.map((event, index) => (
-              <a
-                key={event.id ?? index}
-                href={PHOTOGRAPHY_DRIVE_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <motion.article
-                  data-cursor="VIEW"
-                  variants={{
-                    hidden: { opacity: 0, y: 40 },
-                    visible: { 
-                      opacity: 1, 
-                      y: 0, 
-                      transition: { duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] } 
-                    },
-                    hover: {
-                      y: -6,
-                      borderColor: "rgba(104, 211, 47, 0.4)",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
-                    }
-                  }}
-                  initial="hidden"
-                  whileInView="visible"
-                  whileHover="hover"
-                  viewport={{ once: true, margin: "-50px" }}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 cursor-pointer"
+          <div className="mt-12">
+            {pastEvents.length === 0 ? (
+              <div className="p-12 text-center rounded-3xl border border-white/10 bg-[#0a0c0a] max-w-xl mx-auto space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#68d32f]/10 text-[#68d32f] flex items-center justify-center mx-auto text-2xl">
+                  📸
+                </div>
+                <h3 className="text-xl font-semibold text-white">No Past Event Photos Attached Yet</h3>
+                <p className="text-xs text-white/50 leading-relaxed max-w-md mx-auto">
+                  Once the Photography team uploads media archives for past events scheduled by the Technical team, event photo galleries will appear here automatically.
+                </p>
+                <a
+                  href={PHOTOGRAPHY_DRIVE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-semibold bg-white/10 border border-white/20 text-white hover:bg-[#68d32f] hover:text-black hover:border-[#68d32f] transition-all cursor-pointer"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-amber-400 font-mono text-xs px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/30">
-                      PAST EVENT
-                    </span>
-
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
-                      📸 Media Drive
-                    </span>
-                  </div>
-
-                  <div className="mt-12">
-                    <p className="mb-3 text-xs uppercase tracking-[0.2em] text-[#68d32f]">
-                      {event.date}
-                    </p>
-
-                    <h3 className="text-2xl font-medium tracking-tight md:text-3xl">
-                      {event.title}
-                    </h3>
-
-                    <p className="mt-4 text-sm leading-6 text-white/50 line-clamp-3">
-                      {event.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-5">
-                    <span className="text-sm text-white/70 group-hover:text-[#68d32f] transition-colors flex items-center gap-1.5 font-medium">
-                      Access Event Photos & Drive
-                    </span>
-
-                    <motion.span 
+                  Browse Photography Google Drive ↗
+                </a>
+              </div>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {pastEvents.map((event, index) => (
+                  <a
+                    key={event.id ?? index}
+                    href={PHOTOGRAPHY_DRIVE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <motion.article
+                      data-cursor="VIEW"
                       variants={{
-                        hover: { x: 6, color: "#68d32f", transition: { duration: 0.3 } }
+                        hidden: { opacity: 0, y: 40 },
+                        visible: { 
+                          opacity: 1, 
+                          y: 0, 
+                          transition: { duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] } 
+                        },
+                        hover: {
+                          y: -6,
+                          borderColor: "rgba(104, 211, 47, 0.4)",
+                          backgroundColor: "rgba(255, 255, 255, 0.05)",
+                          transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+                        }
                       }}
-                      className="text-xl"
+                      initial="hidden"
+                      whileInView="visible"
+                      whileHover="hover"
+                      viewport={{ once: true, margin: "-50px" }}
+                      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 cursor-pointer"
                     >
-                      ↗
-                    </motion.span>
-                  </div>
-                </motion.article>
-              </a>
-            ))}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-amber-400 font-mono text-xs px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/30">
+                          PAST EVENT
+                        </span>
+
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          📸 Media Drive
+                        </span>
+                      </div>
+
+                      <div className="mt-12">
+                        <p className="mb-3 text-xs uppercase tracking-[0.2em] text-[#68d32f]">
+                          {event.date}
+                        </p>
+
+                        <h3 className="text-2xl font-medium tracking-tight md:text-3xl">
+                          {event.title}
+                        </h3>
+
+                        <p className="mt-4 text-sm leading-6 text-white/50 line-clamp-3">
+                          {event.description}
+                        </p>
+                      </div>
+
+                      <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-5">
+                        <span className="text-sm text-white/70 group-hover:text-[#68d32f] transition-colors flex items-center gap-1.5 font-medium">
+                          Access Event Photos & Drive
+                        </span>
+
+                        <motion.span 
+                          variants={{
+                            hover: { x: 6, color: "#68d32f", transition: { duration: 0.3 } }
+                          }}
+                          className="text-xl"
+                        >
+                          ↗
+                        </motion.span>
+                      </div>
+                    </motion.article>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
