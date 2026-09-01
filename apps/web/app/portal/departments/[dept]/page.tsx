@@ -18,11 +18,15 @@ import {
   ExternalLink,
   AlertCircle,
   Loader2,
+  Plus,
+  Award,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { apiGet, API_BASE } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { apiGet, apiPost, API_BASE } from "@/lib/api";
 
 const DRIVE_ROOT_URL = "https://drive.google.com/drive/u/0/folders/1LafIbcge-2_pTd2KROcZ_X6wn9c_j9UT";
 
@@ -39,14 +43,14 @@ const DEPT_META: Record<
   EXECUTIVE_COUNCIL: {
     name: "Executive Council Desk",
     badge: "LEADERSHIP & GOVERNANCE",
-    description: "Central command desk for GCC Presidents and Executive Members to oversee global task allocation and legal MoUs.",
+    description: "Central command desk for GCC Presidents and Executive Members to oversee global task allocation, publish partner MoUs, and post opportunity announcements.",
     icon: ShieldCheck,
     color: "text-amber-400 border-amber-500/30",
   },
   RESEARCH_PUBLICATION: {
     name: "Research & Publication Desk",
     badge: "RESEARCH & KNOWLEDGE",
-    description: "Academic knowledge hub for managing collaborative research documentation, papers, and Google Drive archives.",
+    description: "Academic knowledge hub for managing collaborative research documentation, publishing institutional MoUs, and posting fellowship opportunities.",
     icon: FileText,
     color: "text-indigo-400 border-indigo-500/30",
   },
@@ -92,6 +96,14 @@ export default function DepartmentDeskPage() {
   const rawDept = (params?.dept as string) || "TECHNICAL";
   const deptKey = rawDept.toUpperCase().replace("-", "_");
 
+  // Publishing form state for MoUs and Opportunities
+  const [showMouModal, setShowMouModal] = useState(false);
+  const [showOppModal, setShowOppModal] = useState(false);
+  const [mouForm, setMouForm] = useState({ title: "", institution: "", description: "", mouFileUrl: "" });
+  const [oppForm, setOppForm] = useState({ title: "", category: "FELLOWSHIP", description: "", deadline: "", applyUrl: "", attachmentUrl: "" });
+  const [publishing, setPublishing] = useState(false);
+  const [publishMsg, setPublishMsg] = useState<string | null>(null);
+
   const meta = DEPT_META[deptKey] || {
     name: `${deptKey.replace("_", " ")} Desk`,
     badge: "DEPARTMENT DESK",
@@ -101,6 +113,38 @@ export default function DepartmentDeskPage() {
   };
 
   const Icon = meta.icon;
+
+  const handlePublishMou = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      await apiPost("/api/v1/collaborations", mouForm);
+      setPublishMsg("✓ Partner MoU published successfully to main website!");
+      setMouForm({ title: "", institution: "", description: "", mouFileUrl: "" });
+      setShowMouModal(false);
+    } catch (err: any) {
+      setPublishMsg(`✗ ${err.message || "Failed to publish MoU"}`);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handlePublishOpp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      await apiPost("/api/v1/opportunities", oppForm);
+      setPublishMsg("✓ Opportunity announcement published successfully to main website!");
+      setOppForm({ title: "", category: "FELLOWSHIP", description: "", deadline: "", applyUrl: "", attachmentUrl: "" });
+      setShowOppModal(false);
+    } catch (err: any) {
+      setPublishMsg(`✗ ${err.message || "Failed to publish opportunity"}`);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   return (
     <div className="space-y-8 text-white">
@@ -131,40 +175,232 @@ export default function DepartmentDeskPage() {
         </div>
       </div>
 
-      {/* ── 1. EXECUTIVE COUNCIL DESK ── */}
-      {deptKey === "EXECUTIVE_COUNCIL" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link href="/portal/tasks" className="block">
-            <Card className="glass-panel border-amber-500/30 hover:border-amber-500/60 transition-colors h-full">
-              <CardHeader>
-                <CardTitle className="text-base text-white flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-amber-400" /> Global Task Summary & Allocation
-                  </span>
-                  <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">6 DEPARTMENTS</Badge>
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Delegate tasks across all departments, set deadlines, and monitor execution progress across the council.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+      {publishMsg && (
+        <div
+          className={`p-3 rounded-lg text-xs font-medium ${
+            publishMsg.startsWith("✓")
+              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+              : "bg-red-500/10 border border-red-500/30 text-red-400"
+          }`}
+        >
+          {publishMsg}
+        </div>
+      )}
 
-          <Link href="/collaborations" className="block">
-            <Card className="glass-panel border-emerald-500/30 hover:border-emerald-500/60 transition-colors h-full">
+      {/* ── 1. EXECUTIVE COUNCIL DESK & RESEARCH DESK PUBLISHING ── */}
+      {(deptKey === "EXECUTIVE_COUNCIL" || deptKey === "RESEARCH_PUBLICATION") && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="glass-panel border-emerald-500/30 hover:border-emerald-500/60 transition-colors">
               <CardHeader>
                 <CardTitle className="text-base text-white flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-emerald-400" /> Legal MoU Document References
+                    <FileText className="w-5 h-5 text-emerald-400" /> Publish Partner MoU
                   </span>
-                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">INSTITUTIONAL</Badge>
+                  <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/30">WEBSITE LIVE</Badge>
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Access legal contracts, partner university MoUs, fellowship agreements, and official institutional documentation.
+                <CardDescription className="text-xs text-slate-400 mb-4">
+                  Publish institutional MoUs, agreements, and document photos directly to the public Collaborations page.
                 </CardDescription>
+                <Button
+                  size="sm"
+                  className="w-full text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white"
+                  onClick={() => setShowMouModal(!showMouModal)}
+                >
+                  <Plus className="w-3.5 h-3.5" /> {showMouModal ? "Cancel Form" : "Publish New Partner MoU"}
+                </Button>
               </CardHeader>
             </Card>
-          </Link>
+
+            <Card className="glass-panel border-purple-500/30 hover:border-purple-500/60 transition-colors">
+              <CardHeader>
+                <CardTitle className="text-base text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-purple-400" /> Post Opportunity Announcement
+                  </span>
+                  <Badge variant="outline" className="text-[9px] text-purple-400 border-purple-500/30">WEBSITE LIVE</Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400 mb-4">
+                  Post international fellowships, research grants, and exchange announcements to the Opportunities page.
+                </CardDescription>
+                <Button
+                  size="sm"
+                  className="w-full text-xs gap-1.5 bg-purple-600 hover:bg-purple-500 text-white"
+                  onClick={() => setShowOppModal(!showOppModal)}
+                >
+                  <Plus className="w-3.5 h-3.5" /> {showOppModal ? "Cancel Form" : "Post Opportunity"}
+                </Button>
+              </CardHeader>
+            </Card>
+
+            <Link href="/portal/tasks" className="block">
+              <Card className="glass-panel border-amber-500/30 hover:border-amber-500/60 transition-colors h-full">
+                <CardHeader>
+                  <CardTitle className="text-base text-white flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-amber-400" /> Global Task Allocation
+                    </span>
+                    <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">TASKS</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-400">
+                    Delegate tasks across all departments, set deadlines, and monitor execution progress.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
+
+          {/* Inline MoU Form */}
+          {showMouModal && (
+            <Card className="glass-panel border-emerald-500/40 bg-slate-950/80 p-6 space-y-4">
+              <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                <FileText className="w-4 h-4 text-emerald-400" /> Publish New Partner MoU to Collaborations Page
+              </h3>
+              <form onSubmit={handlePublishMou} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">MoU Title</label>
+                    <Input
+                      required
+                      placeholder="e.g. Global Student Exchange & Research Mobility MoU"
+                      value={mouForm.title}
+                      onChange={(e) => setMouForm({ ...mouForm, title: e.target.value })}
+                      className="bg-slate-900 border-slate-800 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Partner Institution / University</label>
+                    <Input
+                      required
+                      placeholder="e.g. Erasmus+ Consortium & Partner European Universities"
+                      value={mouForm.institution}
+                      onChange={(e) => setMouForm({ ...mouForm, institution: e.target.value })}
+                      className="bg-slate-900 border-slate-800 text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Description & Scope of Agreement</label>
+                  <Textarea
+                    required
+                    rows={3}
+                    placeholder="Describe the scope of student exchange, joint research grants, or academic mobility..."
+                    value={mouForm.description}
+                    onChange={(e) => setMouForm({ ...mouForm, description: e.target.value })}
+                    className="bg-slate-900 border-slate-800 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">MoU PDF / Photo Document URL (Optional Drive Link)</label>
+                  <Input
+                    placeholder="https://drive.google.com/..."
+                    value={mouForm.mouFileUrl}
+                    onChange={(e) => setMouForm({ ...mouForm, mouFileUrl: e.target.value })}
+                    className="bg-slate-900 border-slate-800 text-xs text-white"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => setShowMouModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" size="sm" disabled={publishing} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white">
+                    {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Publish MoU to Website"}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
+
+          {/* Inline Opportunity Form */}
+          {showOppModal && (
+            <Card className="glass-panel border-purple-500/40 bg-slate-950/80 p-6 space-y-4">
+              <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                <Award className="w-4 h-4 text-purple-400" /> Post New Opportunity Announcement
+              </h3>
+              <form onSubmit={handlePublishOpp} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Opportunity Title</label>
+                    <Input
+                      required
+                      placeholder="e.g. Erasmus+ European Academic Mobility Fellowship 2026"
+                      value={oppForm.title}
+                      onChange={(e) => setOppForm({ ...oppForm, title: e.target.value })}
+                      className="bg-slate-900 border-slate-800 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Category</label>
+                    <select
+                      className="w-full h-9 rounded-md bg-slate-900 border border-slate-800 text-xs text-white px-3"
+                      value={oppForm.category}
+                      onChange={(e) => setOppForm({ ...oppForm, category: e.target.value })}
+                    >
+                      <option value="FELLOWSHIP">Fellowship Grant</option>
+                      <option value="RESEARCH_GRANT">Research Grant</option>
+                      <option value="EXCHANGE_PROGRAM">International Exchange</option>
+                      <option value="INTERNSHIP">Global Internship</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Application Deadline (Optional)</label>
+                    <Input
+                      placeholder="e.g. Dec 31, 2026"
+                      value={oppForm.deadline}
+                      onChange={(e) => setOppForm({ ...oppForm, deadline: e.target.value })}
+                      className="bg-slate-900 border-slate-800 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Direct Application URL</label>
+                    <Input
+                      placeholder="https://gcc.bmsit.in/apply"
+                      value={oppForm.applyUrl}
+                      onChange={(e) => setOppForm({ ...oppForm, applyUrl: e.target.value })}
+                      className="bg-slate-900 border-slate-800 text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Description & Eligibility Criteria</label>
+                  <Textarea
+                    required
+                    rows={3}
+                    placeholder="Details about grant funding, candidate eligibility, and application procedure..."
+                    value={oppForm.description}
+                    onChange={(e) => setOppForm({ ...oppForm, description: e.target.value })}
+                    className="bg-slate-900 border-slate-800 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Announcement Photo / PDF Attachment URL (Drive Link)</label>
+                  <Input
+                    placeholder="https://drive.google.com/..."
+                    value={oppForm.attachmentUrl}
+                    onChange={(e) => setOppForm({ ...oppForm, attachmentUrl: e.target.value })}
+                    className="bg-slate-900 border-slate-800 text-xs text-white"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => setShowOppModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" size="sm" disabled={publishing} className="text-xs bg-purple-600 hover:bg-purple-500 text-white">
+                    {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Post Opportunity to Website"}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
         </div>
       )}
 
@@ -388,7 +624,6 @@ function DepartmentFilesSection({ departmentId }: { departmentId: string }) {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      // Fetch CSRF token
       try {
         const csrfResp = await fetch(`${API_BASE}/api/v1/auth/csrf-token`, {
           method: "GET",
