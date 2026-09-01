@@ -50,17 +50,25 @@ export default function MemberLoginPage() {
           router.push("/portal/system-admin");
           return;
         }
-        if (u.roles?.includes("EXECUTIVE_COUNCIL")) {
-          router.push("/portal/departments/EXECUTIVE_COUNCIL");
+        // Multi-department member → show workspace selection screen
+        if (u.departments && u.departments.length > 1) {
+          router.push("/portal/departments");
           return;
         }
+        // Single department → go directly to that desk
         if (u.departments?.[0]) {
           router.push(`/portal/departments/${u.departments[0]}`);
+          return;
+        }
+        // Executive council without explicit dept in array
+        if (u.roles?.includes("EXECUTIVE_COUNCIL")) {
+          router.push("/portal/departments/EXECUTIVE_COUNCIL");
           return;
         }
       }
 
       router.push("/portal/dashboard");
+
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.statusCode === 429) {
