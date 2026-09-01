@@ -93,11 +93,11 @@ export default function SystemAdminPage() {
   const [newEmail, setNewEmail] = useState("");
   const [newFullName, setNewFullName] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newDept, setNewDept] = useState<string>("EXECUTIVE_COUNCIL");
+  const [newDepts, setNewDepts] = useState<string[]>(["EXECUTIVE_COUNCIL"]);
   const [newRole, setNewRole] = useState<string>("DEPARTMENT_MEMBER");
 
   // Form states for Manage Selected User
-  const [editDept, setEditDept] = useState<string>("");
+  const [editDepts, setEditDepts] = useState<string[]>([]);
   const [editRoles, setEditRoles] = useState<string[]>([]);
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -186,7 +186,7 @@ export default function SystemAdminPage() {
   // Open Edit User Drawer
   const handleSelectUser = (user: AdminUser) => {
     setSelectedUser(user);
-    setEditDept(user.departments[0] || "");
+    setEditDepts(user.departments.map(String));
     setEditRoles(user.roles);
   };
 
@@ -200,7 +200,7 @@ export default function SystemAdminPage() {
         email: newEmail.trim(),
         fullName: newFullName.trim(),
         password: newPassword.trim() || undefined,
-        departmentId: newDept || undefined,
+        departmentIds: newDepts.length > 0 ? newDepts : undefined,
         roleId: newRole || undefined,
         accountStatus: "ACTIVE",
       });
@@ -209,6 +209,7 @@ export default function SystemAdminPage() {
       setNewEmail("");
       setNewFullName("");
       setNewPassword("");
+      setNewDepts(["EXECUTIVE_COUNCIL"]);
       await loadAdminData();
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Failed to create member.";
@@ -218,19 +219,19 @@ export default function SystemAdminPage() {
     }
   };
 
-  // Update Department
+  // Update Departments (multi)
   const handleUpdateDepartment = async () => {
-    if (!selectedUser || !editDept) return;
+    if (!selectedUser || editDepts.length === 0) return;
     setActionLoading(true);
     try {
       await apiPost(`/api/v1/admin/users/${selectedUser.id}/department`, {
-        departmentId: editDept,
+        departments: editDepts,
       });
-      showToast("success", `Department updated for ${selectedUser.email}.`);
+      showToast("success", `Departments updated for ${selectedUser.email}.`);
       await loadAdminData();
-      setSelectedUser((prev) => (prev ? { ...prev, departments: [editDept as DepartmentId] } : null));
+      setSelectedUser((prev) => (prev ? { ...prev, departments: editDepts as DepartmentId[] } : null));
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : "Failed to update department.";
+      const msg = err instanceof ApiError ? err.message : "Failed to update departments.";
       showToast("error", msg);
     } finally {
       setActionLoading(false);
@@ -492,9 +493,13 @@ export default function SystemAdminPage() {
                           </td>
                           <td className="px-4 py-3">
                             {u.departments.length > 0 ? (
-                              <Badge variant="default" className="text-[10px]">
-                                {u.departments[0].replace("_", " ")}
-                              </Badge>
+                              <div className="flex flex-wrap gap-1">
+                                {u.departments.map((dep) => (
+                                  <Badge key={dep} variant="default" className="text-[10px]">
+                                    {dep.replace(/_/g, " ")}
+                                  </Badge>
+                                ))}
+                              </div>
                             ) : (
                               <span className="text-slate-500 italic text-[11px]">Unassigned</span>
                             )}
@@ -679,20 +684,33 @@ export default function SystemAdminPage() {
                   />
                   <p className="text-[10px] text-slate-500">The user can change this password upon login or reset.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-300">Department</label>
-                    <select
-                      value={newDept}
-                      onChange={(e) => setNewDept(e.target.value)}
-                      className="w-full h-10 px-3 rounded-lg bg-slate-950/60 border border-slate-700/80 text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-red-500"
-                    >
-                      {departments.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="text-xs font-medium text-slate-300">Department(s) <span className="text-slate-500">(Select one or more)</span></label>
+                    <div className="grid grid-cols-2 gap-1.5 pt-1">
+                      {departments.map((d) => {
+                        const isChecked = newDepts.includes(d.id);
+                        return (
+                          <label
+                            key={d.id}
+                            className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                              isChecked ? "bg-red-500/10 border-red-500/40 text-red-200" : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) setNewDepts([...newDepts, d.id]);
+                                else setNewDepts(newDepts.filter((x) => x !== d.id));
+                              }}
+                              className="rounded border-slate-700 text-red-500 focus:ring-red-500"
+                            />
+                            <span>{d.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-300">Primary Role</label>
@@ -739,27 +757,39 @@ export default function SystemAdminPage() {
               </button>
             </CardHeader>
             <CardContent className="space-y-6 pt-4">
-              {/* Section 1: Department Assignment */}
+              {/* Section 1: Department Assignment (Multi) */}
               <div className="space-y-2 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
                 <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
                   <Building className="w-4 h-4 text-blue-400" /> Department Assignment
                 </h4>
-                <p className="text-[11px] text-slate-400">Assign this user to a specific operational department.</p>
-                <div className="flex gap-2 pt-2">
-                  <select
-                    value={editDept}
-                    onChange={(e) => setEditDept(e.target.value)}
-                    className="flex-1 h-9 px-3 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-red-500"
-                  >
-                    <option value="">-- Select Department --</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} ({d.id})
-                      </option>
-                    ))}
-                  </select>
-                  <Button size="sm" onClick={handleUpdateDepartment} disabled={actionLoading || !editDept} className="text-xs">
-                    Save Department
+                <p className="text-[11px] text-slate-400">Assign this user to one or more departments. Multi-department members will see a workspace selector on login.</p>
+                <div className="grid grid-cols-2 gap-1.5 pt-2">
+                  {departments.map((d) => {
+                    const isChecked = editDepts.includes(d.id);
+                    return (
+                      <label
+                        key={d.id}
+                        className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                          isChecked ? "bg-blue-500/10 border-blue-500/40 text-blue-200" : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) setEditDepts([...editDepts, d.id]);
+                            else setEditDepts(editDepts.filter((x) => x !== d.id));
+                          }}
+                          className="rounded border-slate-700 text-blue-500 focus:ring-blue-500"
+                        />
+                        <span>{d.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <div className="pt-2 flex justify-end">
+                  <Button size="sm" onClick={handleUpdateDepartment} disabled={actionLoading || editDepts.length === 0} className="text-xs">
+                    Save Departments
                   </Button>
                 </div>
               </div>

@@ -163,6 +163,7 @@ const CreateMemberSchema = z.object({
   fullName: z.string().min(1),
   password: z.string().min(8).optional(),
   departmentId: z.string().optional(),
+  departmentIds: z.array(z.string()).optional(),
   roleId: z.string().optional(),
   accountStatus: z.enum(['ACTIVE', 'SUSPENDED', 'REVOKED', 'PENDING_PASSWORD_SETUP']).optional(),
 });
@@ -176,18 +177,15 @@ adminRouter.post('/users', zValidator('json', CreateMemberSchema), async (c) => 
   const now = Math.floor(Date.now() / 1000);
 
   // Check if user with this email already exists
-  const existing = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(normalizedEmail).first();
+  const existing = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(normalizedEmail).first<{ id: string }>();
   if (existing) {
     return c.json({ success: false, error: { code: 'DUPLICATE_EMAIL', message: 'A user with this email already exists' } }, 409);
   }
 
-  // Validate department if provided
-  if (body.departmentId) {
-    const deptExists = await c.env.DB.prepare('SELECT id FROM departments WHERE id = ?').bind(body.departmentId).first();
-    if (!deptExists) {
-      return c.json({ success: false, error: { code: 'INVALID_DEPARTMENT', message: 'Specified department does not exist' } }, 400);
-    }
-  }
+  // Support array of departments
+  const deptsToAssign: string[] = body.departmentIds && body.departmentIds.length > 0
+    ? body.departmentIds
+    : body.departmentId ? [body.departmentId] : [];
 
   // Validate role if provided
   const roleToAssign = body.roleId || 'DEPARTMENT_MEMBER';
@@ -201,6 +199,10 @@ adminRouter.post('/users', zValidator('json', CreateMemberSchema), async (c) => 
   const passwordHash = await hashPassword(initialPassword);
   const accountStatus = body.accountStatus || 'ACTIVE';
 
+  const deptInsertStmts = deptsToAssign.map((dId) =>
+    c.env.DB.prepare(`INSERT INTO user_departments (user_id, department_id) VALUES (?, ?)`).bind(userId, dId)
+  );
+
   await c.env.DB.batch([
     c.env.DB.prepare(
       `INSERT INTO users (id, email, full_name, password_hash, account_status, created_at, updated_at)
@@ -209,16 +211,14 @@ adminRouter.post('/users', zValidator('json', CreateMemberSchema), async (c) => 
     c.env.DB.prepare(
       `INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`
     ).bind(userId, roleToAssign),
-    ...(body.departmentId
-      ? [c.env.DB.prepare(`INSERT INTO user_departments (user_id, department_id) VALUES (?, ?)`).bind(userId, body.departmentId)]
-      : []),
+    ...deptInsertStmts,
   ]);
 
   await auditLog(
     c.env.DB,
     adminUser.id,
     'ADMIN_ACTION',
-    { action: 'user_created', targetUserId: userId, email: normalizedEmail, role: roleToAssign, department: body.departmentId || null },
+    { action: 'user_created', targetUserId: userId, email: normalizedEmail, role: roleToAssign, departments: deptsToAssign },
     ip,
     ua
   );
@@ -233,7 +233,7 @@ adminRouter.post('/users', zValidator('json', CreateMemberSchema), async (c) => 
           fullName: body.fullName.trim(),
           accountStatus,
           roles: [roleToAssign as RoleId],
-          departments: (body.departmentId ? [body.departmentId as DepartmentId] : []),
+          departments: deptsToAssign as DepartmentId[],
         },
         message: 'Member successfully onboarded.',
       },
@@ -243,41 +243,43 @@ adminRouter.post('/users', zValidator('json', CreateMemberSchema), async (c) => 
 });
 
 // ----------------------------------------------------------
-// 4. POST /api/v1/admin/users/:id/department — Assign / Change Department
+// 4. POST /api/v1/admin/users/:id/department — Assign / Change Departments
 // ----------------------------------------------------------
 const AssignDepartmentSchema = z.object({
-  departmentId: z.string().min(1),
+  departmentId: z.string().optional(),
+  departments: z.array(z.string()).optional(),
 });
 
 adminRouter.post('/users/:id/department', zValidator('json', AssignDepartmentSchema), async (c) => {
   const adminUser = c.get('user');
   const targetId = c.req.param('id');
-  const { departmentId } = c.req.valid('json');
+  const body = c.req.valid('json');
   const ip = c.req.header('CF-Connecting-IP') ?? '';
   const ua = c.req.header('User-Agent') ?? '';
   const now = Math.floor(Date.now() / 1000);
+
+  const deptsToAssign: string[] = body.departments && body.departments.length > 0
+    ? body.departments
+    : body.departmentId ? [body.departmentId] : [];
 
   const user = await c.env.DB.prepare('SELECT id, email FROM users WHERE id = ?').bind(targetId).first<{ id: string; email: string }>();
   if (!user) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } }, 404);
   }
 
-  const dept = await c.env.DB.prepare('SELECT id, name FROM departments WHERE id = ?').bind(departmentId).first<{ id: string; name: string }>();
-  if (!dept) {
-    return c.json({ success: false, error: { code: 'INVALID_DEPARTMENT', message: 'Department does not exist' } }, 400);
-  }
+  const deleteStmt = c.env.DB.prepare('DELETE FROM user_departments WHERE user_id = ?').bind(user.id);
+  const insertStmts = deptsToAssign.map((dId) =>
+    c.env.DB.prepare('INSERT INTO user_departments (user_id, department_id) VALUES (?, ?)').bind(user.id, dId)
+  );
+  const updateStmt = c.env.DB.prepare('UPDATE users SET updated_at = ? WHERE id = ?').bind(now, user.id);
 
-  await c.env.DB.batch([
-    c.env.DB.prepare('DELETE FROM user_departments WHERE user_id = ?').bind(user.id),
-    c.env.DB.prepare('INSERT INTO user_departments (user_id, department_id) VALUES (?, ?)').bind(user.id, departmentId),
-    c.env.DB.prepare('UPDATE users SET updated_at = ? WHERE id = ?').bind(now, user.id),
-  ]);
+  await c.env.DB.batch([deleteStmt, ...insertStmts, updateStmt]);
 
   await auditLog(
     c.env.DB,
     adminUser.id,
     'DEPARTMENT_CHANGED',
-    { targetUserId: user.id, targetEmail: user.email, newDepartment: departmentId, departmentName: dept.name },
+    { targetUserId: user.id, targetEmail: user.email, newDepartments: deptsToAssign },
     ip,
     ua
   );
@@ -286,9 +288,8 @@ adminRouter.post('/users/:id/department', zValidator('json', AssignDepartmentSch
     success: true,
     data: {
       userId: user.id,
-      departmentId,
-      departmentName: dept.name,
-      message: `Department updated to ${dept.name}.`,
+      departments: deptsToAssign,
+      message: `Departments updated successfully.`,
     },
   });
 });
