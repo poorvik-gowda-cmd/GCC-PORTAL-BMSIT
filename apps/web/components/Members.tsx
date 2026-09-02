@@ -211,7 +211,7 @@ export default function Members() {
     [hierarchyMap]
   );
 
-  // Preload anime images (unchanged)
+  // Preload anime images for zero-latency instant transitions
   useEffect(() => {
     members.forEach((member) => {
       if (member.animePhoto) {
@@ -219,7 +219,13 @@ export default function Members() {
         img.src = member.animePhoto;
       }
     });
-  }, []);
+    hierarchyMap.forEach((member) => {
+      if (member.animePhoto) {
+        const img = new window.Image();
+        img.src = member.animePhoto;
+      }
+    });
+  }, [hierarchyMap]);
 
   const selectedMember = selectedMemberId
     ? findMemberById(selectedMemberId)
