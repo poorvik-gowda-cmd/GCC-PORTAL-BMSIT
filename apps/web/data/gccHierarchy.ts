@@ -372,3 +372,79 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     ],
   },
 ];
+
+// ──────────────────────────────────────────────
+// ADAPTER — HierarchyMember → Member
+// Converts hierarchy data to the Member shape so
+// the existing MemberCard + MemberProfileOverlay
+// cinematic system works identically for all cards.
+// ──────────────────────────────────────────────
+export const PLACEHOLDER_PHOTO = "/images/logo/gcc-logo.png";
+
+export interface Member {
+  id: string;
+  name: string;
+  role: string;
+  chapter: string;
+  photo: string;
+  animePhoto?: string;
+  department: string;
+  year: string;
+  team: string;
+  bio: string;
+  social?: {
+    linkedin?: string;
+    instagram?: string;
+    twitter?: string;
+    github?: string;
+  };
+}
+
+export function toMember(
+  hm: HierarchyMember,
+  department: string,
+  team: string,
+  chapter: string
+): Member {
+  return {
+    id: hm.id,
+    name: hm.name,
+    role: hm.role,
+    chapter,
+    photo: hm.photo ?? PLACEHOLDER_PHOTO,
+    animePhoto: undefined,
+    department,
+    year: "2025",
+    team,
+    bio: hm.intro.endsWith("PLACEHOLDER") || hm.intro === ""
+      ? "Bio coming soon — check back for updates."
+      : hm.intro,
+    social: hm.social,
+  };
+}
+
+/** Build a flat lookup map of all hierarchy members by id */
+export function buildHierarchyMemberMap(): Map<string, Member> {
+  const map = new Map<string, Member>();
+
+  const addMember = (hm: HierarchyMember, dept: string, team: string, chapter: string) => {
+    if (!map.has(hm.id)) {
+      map.set(hm.id, toMember(hm, dept, team, chapter));
+    }
+  };
+
+  addMember(GCC_PRESIDENT, "Executive Council", "Executive Council", "KAPPA ALPHA");
+  EXECUTIVE_COUNCIL_MEMBERS.forEach((m) =>
+    addMember(m, "Executive Council", "Executive Council", "KAPPA ALPHA")
+  );
+
+  GCC_DEPARTMENTS.forEach((dept) => {
+    addMember(dept.lead, dept.name, dept.name, dept.clubName);
+    dept.members.forEach((m) =>
+      addMember(m, dept.name, dept.name, dept.clubName)
+    );
+  });
+
+  return map;
+}
+
