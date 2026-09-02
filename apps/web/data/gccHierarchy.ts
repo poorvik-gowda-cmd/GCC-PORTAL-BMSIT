@@ -3,13 +3,12 @@
 // apps/web/data/gccHierarchy.ts
 //
 // PURPOSE: Static data for the public Members page hierarchy.
-// This is COMPLETELY SEPARATE from the member portal user system.
-// DO NOT fetch from or connect to the portal DB/API.
+// COMPLETELY SEPARATE from the member portal user system.
 //
 // HOW TO ADD A REAL MEMBER:
 //   1. Replace `name` with the actual name.
-//   2. Replace `photo` null with the image path e.g. "/images/members/ec/name.png".
-//   3. Replace `intro` with a short bio sentence.
+//   2. Replace `photo: null` with the image path.
+//   3. Replace `intro` placeholder string with a real bio.
 //   4. Add social links if available.
 // =============================================================
 
@@ -17,7 +16,7 @@ export interface HierarchyMember {
   id: string;
   name: string;
   role: string;
-  photo: string | null;   // null → shows initials avatar until real photo added
+  photo: string | null;
   intro: string;
   social?: {
     linkedin?: string;
@@ -28,7 +27,7 @@ export interface HierarchyMember {
 export interface HierarchyDepartment {
   id: string;
   name: string;
-  clubName: string;       // Greek-letter club name shown as secondary branding
+  clubName: string;
   lead: HierarchyMember;
   members: HierarchyMember[];
 }
@@ -48,19 +47,19 @@ export const GCC_PRESIDENT: HierarchyMember = {
 
 export const EXECUTIVE_COUNCIL_MEMBERS: HierarchyMember[] = [
   {
-    id: "ec-member-1",
-    name: "EC_MEMBER_1_NAME",
-    role: "EC_MEMBER_1_ROLE",
-    photo: null,
-    intro: "EC_MEMBER_1_INTRO_PLACEHOLDER",
+    id: "ec-sumukh",
+    name: "Sumukh R",
+    role: "Managing Director",
+    photo: "/images/logo/members/8.png",
+    intro: "Steering the operational strategy and long-term vision of GCC, ensuring the organization delivers measurable impact for every student it touches.",
     social: {},
   },
   {
-    id: "ec-member-2",
-    name: "EC_MEMBER_2_NAME",
-    role: "EC_MEMBER_2_ROLE",
-    photo: null,
-    intro: "EC_MEMBER_2_INTRO_PLACEHOLDER",
+    id: "ec-manvil",
+    name: "Manvil G Shetty",
+    role: "Director of External Relations",
+    photo: "/images/logo/members/9.png",
+    intro: "Cultivating strategic partnerships with international organizations, universities, and industry leaders to expand GCC's global network.",
     social: {},
   },
   {
@@ -94,6 +93,7 @@ export const EXECUTIVE_COUNCIL_MEMBERS: HierarchyMember[] = [
 // ──────────────────────────────────────────────
 
 export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
+
   // 1. RESEARCH & PUBLICATION  |  DELTA NU
   {
     id: "research",
@@ -109,11 +109,11 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     },
     members: [
       {
-        id: "research-member-1",
-        name: "RESEARCH_MEMBER_1_NAME",
+        id: "research-vaibhavi",
+        name: "Vaibhavi VK",
         role: "Research Associate",
-        photo: null,
-        intro: "RESEARCH_MEMBER_1_INTRO_PLACEHOLDER",
+        photo: "/images/logo/members/4.png",
+        intro: "Exploring emerging trends in global education and identifying research collaboration opportunities that connect BMSIT with international institutions.",
         social: {},
       },
       {
@@ -141,11 +141,11 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     name: "Events & Operations",
     clubName: "ZETA",
     lead: {
-      id: "events-lead",
-      name: "EVENTS_LEAD_NAME",
+      id: "events-namratha",
+      name: "Namratha R Bagade",
       role: "Events & Operations — Team Lead",
-      photo: null,
-      intro: "EVENTS_LEAD_INTRO_PLACEHOLDER",
+      photo: "/images/logo/members/10.png",
+      intro: "Designing and executing world-class events that bring global thought leaders, innovators, and students together for transformative experiences.",
       social: {},
     },
     members: [
@@ -190,28 +190,28 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     name: "Marketing & Outreach",
     clubName: "SIGMA PI",
     lead: {
-      id: "marketing-lead",
-      name: "MARKETING_LEAD_NAME",
+      id: "marketing-suchetha",
+      name: "Suchetha",
       role: "Marketing & Outreach — Team Lead",
-      photo: null,
-      intro: "MARKETING_LEAD_INTRO_PLACEHOLDER",
+      photo: "/images/logo/members/suchetha.png",
+      intro: "Leading GCC's marketing vision with impactful cross-border campaigns and strategic initiatives that amplify student voices on the international stage.",
       social: {},
     },
     members: [
       {
-        id: "marketing-member-1",
-        name: "MARKETING_MEMBER_1_NAME",
+        id: "marketing-rishu",
+        name: "Rishu Aryan",
         role: "Marketing Associate",
-        photo: null,
-        intro: "MARKETING_MEMBER_1_INTRO_PLACEHOLDER",
+        photo: "/images/logo/members/2.png",
+        intro: "Driving brand awareness and creative campaigns that position GCC as a leading student-driven global collaboration initiative.",
         social: {},
       },
       {
-        id: "marketing-member-2",
-        name: "MARKETING_MEMBER_2_NAME",
+        id: "marketing-mohit",
+        name: "Mohit Yadav",
         role: "Marketing Associate",
-        photo: null,
-        intro: "MARKETING_MEMBER_2_INTRO_PLACEHOLDER",
+        photo: "/images/logo/members/3.png",
+        intro: "Crafting compelling narratives and visual content that communicate GCC's mission to audiences across multiple platforms.",
         social: {},
       },
       {
@@ -248,35 +248,35 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     },
     members: [
       {
-        id: "design-member-1",
-        name: "DESIGN_MEMBER_1_NAME",
-        role: "Design Associate",
-        photo: null,
-        intro: "DESIGN_MEMBER_1_INTRO_PLACEHOLDER",
+        id: "design-poorvik",
+        name: "Poorvik",
+        role: "Digital Creative Associate",
+        photo: "/images/logo/members/5.png",
+        intro: "Transforming ideas into impactful digital experiences through creative design, multimedia storytelling, and innovative visual communication.",
         social: {},
       },
       {
-        id: "design-member-2",
-        name: "DESIGN_MEMBER_2_NAME",
-        role: "Design Associate",
-        photo: null,
-        intro: "DESIGN_MEMBER_2_INTRO_PLACEHOLDER",
+        id: "design-manvil",
+        name: "Manvil G Shetty",
+        role: "Design Member",
+        photo: "/images/logo/members/9.png",
+        intro: "Bringing an eye for detail and global perspective to every design project, helping GCC communicate its mission visually with impact.",
         social: {},
       },
       {
-        id: "design-member-3",
-        name: "DESIGN_MEMBER_3_NAME",
-        role: "Design Associate",
-        photo: null,
-        intro: "DESIGN_MEMBER_3_INTRO_PLACEHOLDER",
+        id: "design-ahana",
+        name: "Ahana Shrothri",
+        role: "Design Member",
+        photo: "/images/logo/members/6.png",
+        intro: "Orchestrating cross-functional creative initiatives and ensuring seamless visual collaboration across GCC departments.",
         social: {},
       },
       {
-        id: "design-member-4",
-        name: "DESIGN_MEMBER_4_NAME",
-        role: "Design Associate",
-        photo: null,
-        intro: "DESIGN_MEMBER_4_INTRO_PLACEHOLDER",
+        id: "design-vaibhavi",
+        name: "Vaibhavi VK",
+        role: "Design Member",
+        photo: "/images/logo/members/4.png",
+        intro: "Combining research insights with design thinking to create visually compelling materials that resonate with global audiences.",
         social: {},
       },
     ],
@@ -288,28 +288,28 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     name: "Social Media, Innovation & Digital Integration",
     clubName: "OMEGA PSI",
     lead: {
-      id: "social-lead",
-      name: "SOCIAL_LEAD_NAME",
-      role: "Social Media & Digital — Team Lead",
-      photo: null,
-      intro: "SOCIAL_LEAD_INTRO_PLACEHOLDER",
+      id: "social-namratha",
+      name: "Namratha R Bagade",
+      role: "Social Media & Digital Integration — Team Lead",
+      photo: "/images/logo/members/10.png",
+      intro: "Driving GCC's digital presence and innovation agenda, connecting student talent with global opportunities through strategic social platforms.",
       social: {},
     },
     members: [
       {
-        id: "social-member-1",
-        name: "SOCIAL_MEMBER_1_NAME",
+        id: "social-mohit",
+        name: "Mohit Yadav",
         role: "Social Media Associate",
-        photo: null,
-        intro: "SOCIAL_MEMBER_1_INTRO_PLACEHOLDER",
+        photo: "/images/logo/members/3.png",
+        intro: "Crafting engaging digital content and managing GCC's social media presence to maximize reach and community engagement.",
         social: {},
       },
       {
-        id: "social-member-2",
-        name: "SOCIAL_MEMBER_2_NAME",
-        role: "Social Media Associate",
-        photo: null,
-        intro: "SOCIAL_MEMBER_2_INTRO_PLACEHOLDER",
+        id: "social-harsha",
+        name: "Harsha",
+        role: "Social Media Coordinator",
+        photo: "/images/logo/members/7.png",
+        intro: "Building GCC's digital presence across social platforms with strategic content, community engagement, and data-driven campaigns.",
         social: {},
       },
       {
