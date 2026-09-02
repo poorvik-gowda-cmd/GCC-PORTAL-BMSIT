@@ -39,10 +39,11 @@ export interface HierarchyDepartment {
 
 export const GCC_PRESIDENT: HierarchyMember = {
   id: "ec-president",
-  name: "PRESIDENT_NAME",
-  role: "President",
-  photo: null,
-  intro: "PRESIDENT_INTRO_PLACEHOLDER",
+  name: "Abhyuday",
+  role: "President & Global Director",
+  photo: "/images/logo/members/anime/abhyuday.png",
+  animePhoto: "/images/logo/members/anime/abhyuday.png",
+  intro: "Leading the Global Collaboration Cell as President and Global Director, driving GCC's mission to build cross-border partnerships and create transformative opportunities for students at BMSIT.",
   social: {},
 };
 
@@ -104,10 +105,11 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     clubName: "DELTA NU",
     lead: {
       id: "research-lead",
-      name: "RESEARCH_LEAD_NAME",
-      role: "Research & Publication — Team Lead",
-      photo: null,
-      intro: "RESEARCH_LEAD_INTRO_PLACEHOLDER",
+      name: "Aditya",
+      role: "Research & Publication — Research Head",
+      photo: "/images/logo/members/anime/aditya.jpg",
+      animePhoto: "/images/logo/members/anime/aditya.jpg",
+      intro: "Heading the Research & Publication desk at GCC, driving academic collaborations, publication initiatives, and knowledge-sharing programs across borders.",
       social: {},
     },
     members: [
@@ -122,10 +124,11 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
       },
       {
         id: "research-member-2",
-        name: "RESEARCH_MEMBER_2_NAME",
+        name: "Navneeth M N",
         role: "Research Associate",
-        photo: null,
-        intro: "RESEARCH_MEMBER_2_INTRO_PLACEHOLDER",
+        photo: "/images/logo/members/anime/navneeth.png",
+        animePhoto: "/images/logo/members/anime/navneeth.png",
+        intro: "Contributing to GCC's research initiatives with enthusiasm and dedication, exploring global education trends and collaboration opportunities.",
         social: {},
       },
       {
@@ -329,10 +332,11 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
       },
       {
         id: "social-member-3",
-        name: "SOCIAL_MEMBER_3_NAME",
-        role: "Social Media Associate",
-        photo: null,
-        intro: "SOCIAL_MEMBER_3_INTRO_PLACEHOLDER",
+        name: "Chiranth C",
+        role: "Digital Content Coordinator",
+        photo: "/images/logo/members/anime/chiranth.jpg",
+        animePhoto: "/images/logo/members/anime/chiranth.jpg",
+        intro: "Coordinating digital content strategy across GCC's social media channels, ensuring consistent and engaging communication with the GCC community.",
         social: {},
       },
       {
@@ -361,10 +365,11 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     clubName: "PHI RHO",
     lead: {
       id: "photo-lead",
-      name: "PHOTO_LEAD_NAME",
+      name: "Chiranth C",
       role: "Photography & Visual Media — Team Lead",
-      photo: null,
-      intro: "PHOTO_LEAD_INTRO_PLACEHOLDER",
+      photo: "/images/logo/members/anime/chiranth.jpg",
+      animePhoto: "/images/logo/members/anime/chiranth.jpg",
+      intro: "Leading GCC's Photography and Visual Media team, capturing the moments and stories that define the GCC experience through compelling visual storytelling.",
       social: {},
     },
     members: [
