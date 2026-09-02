@@ -7,7 +7,6 @@ import {
   buildHierarchyMemberMap,
   toMember,
 } from "@/data/gccHierarchy";
-import { members, getMemberById } from "@/data/members";
 import type { Member } from "@/data/members";
 import {
   motion,
@@ -203,22 +202,16 @@ export default function Members() {
     []
   );
 
-  // Combined lookup: searches both original members[] and hierarchy members
+  // Direct lookup from hierarchy members
   const findMemberById = useCallback(
     (id: string): Member | undefined => {
-      return getMemberById(id) ?? hierarchyMap.get(id);
+      return hierarchyMap.get(id);
     },
     [hierarchyMap]
   );
 
   // Preload anime images for zero-latency instant transitions
   useEffect(() => {
-    members.forEach((member) => {
-      if (member.animePhoto) {
-        const img = new window.Image();
-        img.src = member.animePhoto;
-      }
-    });
     hierarchyMap.forEach((member) => {
       if (member.animePhoto) {
         const img = new window.Image();
@@ -430,47 +423,6 @@ export default function Members() {
               />
             </AnimatePresence>
           </div>
-        </motion.div>
-
-        {/* ════════════════════════════════════════
-            SECTION C — ALL MEMBERS (original, unchanged)
-        ════════════════════════════════════════ */}
-        <motion.div
-          className="space-y-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-        >
-          <motion.div variants={fadeUp}>
-            <p className="mb-2 text-sm font-medium uppercase tracking-[0.25em] text-[#5eea19]">
-              All Members
-            </p>
-            <h2 className="text-3xl font-bold uppercase leading-tight tracking-[-0.03em] text-white">
-              The Full Team.
-            </h2>
-          </motion.div>
-
-          <motion.div
-            className="relative z-20 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4"
-            variants={containerVariants}
-          >
-            {members.map((member) => (
-              <MemberCard
-                key={member.id}
-                member={member}
-                isHovered={hoveredMemberId === member.id}
-                isOtherHovered={
-                  hoveredMemberId !== null && hoveredMemberId !== member.id
-                }
-                isSelected={selectedMemberId === member.id}
-                isProfileOpen={isProfileOpen}
-                imageY={imageY}
-                onSelect={(selected) => handleSelectMember(selected)}
-                onHover={setHoveredMemberId}
-              />
-            ))}
-          </motion.div>
         </motion.div>
       </section>
 
