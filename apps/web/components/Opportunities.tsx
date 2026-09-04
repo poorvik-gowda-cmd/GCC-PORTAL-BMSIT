@@ -16,35 +16,9 @@ interface OpportunityItem {
   attachment_url?: string;
 }
 
-const fallbackOpportunities: OpportunityItem[] = [
-  {
-    id: "opp-1",
-    title: "Erasmus+ European Academic Mobility Fellowship 2026",
-    category: "FELLOWSHIP",
-    description: "Fully funded 6-month research & study mobility grant for BMSIT students at partner European universities.",
-    deadline: "Dec 31, 2026",
-    apply_url: "https://gcc.bmsit.in",
-  },
-  {
-    id: "opp-2",
-    title: "International Joint Research & Publication Grant",
-    category: "RESEARCH_GRANT",
-    description: "Seed funding grant up to $5,000 for undergraduate student research papers co-authored with global faculty.",
-    deadline: "Nov 15, 2026",
-    apply_url: "https://gcc.bmsit.in",
-  },
-  {
-    id: "opp-3",
-    title: "Global Summer Tech & Innovation Exchange",
-    category: "EXCHANGE_PROGRAM",
-    description: "3-week international summer school on AI ethics, quantum computing, and sustainable tech in Europe.",
-    deadline: "Oct 30, 2026",
-    apply_url: "https://gcc.bmsit.in",
-  },
-];
-
 export default function Opportunities() {
-  const [items, setItems] = useState<OpportunityItem[]>(fallbackOpportunities);
+  const [items, setItems] = useState<OpportunityItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadOpportunities() {
@@ -52,11 +26,15 @@ export default function Opportunities() {
         const resp = await fetch(`${API_BASE}/api/v1/opportunities`);
         if (resp.ok) {
           const resData = await resp.json();
-          if (resData.success && Array.isArray(resData.data.opportunities) && resData.data.opportunities.length > 0) {
+          if (resData.success && Array.isArray(resData.data.opportunities)) {
             setItems(resData.data.opportunities);
           }
         }
-      } catch {}
+      } catch (err) {
+        console.error("Failed to load opportunities:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     loadOpportunities();
   }, []);
@@ -94,62 +72,79 @@ export default function Opportunities() {
         </motion.div>
 
         {/* Opportunity Cards Grid */}
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {items.map((opp, index) => (
-            <motion.div
-              key={opp.id ?? index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.8, delay: index * 0.1, ease: elegantEase }}
-              className="group relative flex flex-col justify-between rounded-3xl border border-white/10 bg-[#0a0c0a] p-8 shadow-2xl transition-all duration-500 hover:border-[#68d32f]/60 hover:bg-[#0f140f]"
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-mono tracking-widest px-3 py-1 rounded-full bg-[#68d32f]/10 text-[#68d32f] border border-[#68d32f]/30">
-                    {opp.category.replace("_", " ")}
-                  </span>
-                  {opp.deadline && (
-                    <span className="text-[11px] text-amber-400 font-mono">
-                      📅 {opp.deadline}
+        {loading ? (
+          <div className="mt-16 p-16 text-center rounded-3xl border border-white/10 bg-[#0a0c0a] max-w-xl mx-auto space-y-3">
+            <div className="w-8 h-8 border-2 border-[#68d32f] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs text-white/50">Loading opportunities from GCC leadership...</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="mt-16 p-16 text-center rounded-3xl border border-white/10 bg-[#0a0c0a] max-w-xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#68d32f]/10 text-[#68d32f] flex items-center justify-center mx-auto text-2xl">
+              🎓
+            </div>
+            <h3 className="text-xl font-semibold text-white">No Active Announcements Currently</h3>
+            <p className="text-xs text-white/50 leading-relaxed max-w-md mx-auto">
+              Fellowship calls, global research grants, and student exchange opportunities will appear here automatically when announced by the Research &amp; Publication or Executive Council teams.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-16 grid gap-6 md:grid-cols-3">
+            {items.map((opp, index) => (
+              <motion.div
+                key={opp.id ?? index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, delay: index * 0.1, ease: elegantEase }}
+                className="group relative flex flex-col justify-between rounded-3xl border border-white/10 bg-[#0a0c0a] p-8 shadow-2xl transition-all duration-500 hover:border-[#68d32f]/60 hover:bg-[#0f140f]"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-mono tracking-widest px-3 py-1 rounded-full bg-[#68d32f]/10 text-[#68d32f] border border-[#68d32f]/30">
+                      {opp.category.replace("_", " ")}
                     </span>
-                  )}
+                    {opp.deadline && (
+                      <span className="text-[11px] text-amber-400 font-mono">
+                        📅 {opp.deadline}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="mt-6 text-2xl font-bold text-white group-hover:text-[#68d32f] transition-colors leading-snug">
+                    {opp.title}
+                  </h3>
+
+                  <p className="mt-4 text-xs leading-relaxed text-white/50 line-clamp-4">
+                    {opp.description}
+                  </p>
                 </div>
 
-                <h3 className="mt-6 text-2xl font-bold text-white group-hover:text-[#68d32f] transition-colors leading-snug">
-                  {opp.title}
-                </h3>
+                <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
+                  {opp.attachment_url && (
+                    <a
+                      href={opp.attachment_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-blue-400 hover:underline flex items-center gap-1 font-medium"
+                    >
+                      📎 Download Announcement Photo / PDF ↗
+                    </a>
+                  )}
 
-                <p className="mt-4 text-xs leading-relaxed text-white/50 line-clamp-4">
-                  {opp.description}
-                </p>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
-                {opp.attachment_url && (
                   <a
-                    href={opp.attachment_url}
+                    href={opp.apply_url || "#"}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs text-blue-400 hover:underline flex items-center gap-1 font-medium"
+                    className="inline-flex items-center justify-between w-full px-5 py-3 rounded-full bg-white/10 text-white font-medium text-xs hover:bg-[#68d32f] hover:text-black transition-all cursor-pointer"
                   >
-                    📎 Download Announcement Photo / PDF ↗
+                    <span>Apply For Opportunity</span>
+                    <span>→</span>
                   </a>
-                )}
-
-                <a
-                  href={opp.apply_url || "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-between w-full px-5 py-3 rounded-full bg-white/10 text-white font-medium text-xs hover:bg-[#68d32f] hover:text-black transition-all cursor-pointer"
-                >
-                  <span>Apply For Opportunity</span>
-                  <span>→</span>
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

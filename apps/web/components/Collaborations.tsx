@@ -16,29 +16,7 @@ interface CollaborationItem {
   status: string;
 }
 
-const staticFallbackCollaborations: CollaborationItem[] = [
-  {
-    id: "mou-1",
-    title: "Global Student Exchange & Research Fellowship MoU",
-    institution: "Erasmus+ & Partner Universities",
-    description: "Institutional agreement facilitating semester abroad programs, cross-border faculty research grants, and joint academic publications.",
-    status: "ACTIVE",
-  },
-  {
-    id: "mou-2",
-    title: "Cross-Border AI & Innovation Lab MoU",
-    institution: "BMSIT&M International Cell",
-    description: "Collaborative research hub providing student access to supercomputing infrastructure, global patents, and joint tech symposiums.",
-    status: "ACTIVE",
-  },
-  {
-    id: "mou-3",
-    title: "Global Career & Higher Education Guidance MoU",
-    institution: "International University Consortium",
-    description: "Direct pathway mentorship for student MS/PhD admissions, fellowship funding, and international career placements.",
-    status: "ACTIVE",
-  },
-];
+
 
 const NetworkVisual = () => {
   const [activeNode, setActiveNode] = useState<number | null>(null);
@@ -122,7 +100,8 @@ const NetworkVisual = () => {
 };
 
 export default function Collaborations() {
-  const [items, setItems] = useState<CollaborationItem[]>(staticFallbackCollaborations);
+  const [items, setItems] = useState<CollaborationItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadCollaborations() {
@@ -130,11 +109,15 @@ export default function Collaborations() {
         const resp = await fetch(`${API_BASE}/api/v1/collaborations`);
         if (resp.ok) {
           const resData = await resp.json();
-          if (resData.success && Array.isArray(resData.data.collaborations) && resData.data.collaborations.length > 0) {
+          if (resData.success && Array.isArray(resData.data.collaborations)) {
             setItems(resData.data.collaborations);
           }
         }
-      } catch {}
+      } catch (err) {
+        console.error("Failed to load collaborations:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     loadCollaborations();
   }, []);
@@ -183,52 +166,69 @@ export default function Collaborations() {
         </motion.p>
 
         {/* Dynamic Collaboration cards */}
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {items.map((item, index) => (
-            <motion.div
-              key={item.id ?? index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.8, delay: 0.2 + index * 0.1, ease: elegantEase }}
-              className="group border border-white/10 rounded-2xl bg-white/[0.03] p-6 hover:border-[#68d32f]/60 hover:bg-white/5 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono tracking-widest text-[#68d32f] uppercase px-2.5 py-1 rounded bg-[#68d32f]/10 border border-[#68d32f]/20">
-                  {item.status || "MOU SIGNED"}
-                </span>
-                <span className="text-xs text-white/40">0{index + 1}</span>
-              </div>
+        {loading ? (
+          <div className="mt-16 p-16 text-center rounded-3xl border border-white/10 bg-[#0a0c0a] max-w-xl mx-auto space-y-3">
+            <div className="w-8 h-8 border-2 border-[#68d32f] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs text-white/50">Loading institutional MoUs...</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="mt-16 p-16 text-center rounded-3xl border border-white/10 bg-[#0a0c0a] max-w-xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#68d32f]/10 text-[#68d32f] flex items-center justify-center mx-auto text-2xl">
+              🤝
+            </div>
+            <h3 className="text-xl font-semibold text-white">No Institutional MoUs Published Yet</h3>
+            <p className="text-xs text-white/50 leading-relaxed max-w-md mx-auto">
+              Official institutional MoUs, international partnerships, and collaboration agreements will appear here once published by the Executive Council or Research &amp; Publication team.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-16 grid gap-6 md:grid-cols-3">
+            {items.map((item, index) => (
+              <motion.div
+                key={item.id ?? index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, delay: 0.2 + index * 0.1, ease: elegantEase }}
+                className="group border border-white/10 rounded-2xl bg-white/[0.03] p-6 hover:border-[#68d32f]/60 hover:bg-white/5 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono tracking-widest text-[#68d32f] uppercase px-2.5 py-1 rounded bg-[#68d32f]/10 border border-[#68d32f]/20">
+                    {item.status || "MOU SIGNED"}
+                  </span>
+                  <span className="text-xs text-white/40">0{index + 1}</span>
+                </div>
 
-              <h3 className="mt-6 text-xl font-semibold text-white group-hover:text-[#68d32f] transition-colors">
-                {item.title}
-              </h3>
+                <h3 className="mt-6 text-xl font-semibold text-white group-hover:text-[#68d32f] transition-colors">
+                  {item.title}
+                </h3>
 
-              <p className="mt-2 text-xs text-[#68d32f]/80 font-medium">
-                🏛 {item.institution}
-              </p>
+                <p className="mt-2 text-xs text-[#68d32f]/80 font-medium">
+                  🏛 {item.institution}
+                </p>
 
-              <p className="mt-4 text-xs leading-relaxed text-white/50 line-clamp-4">
-                {item.description}
-              </p>
+                <p className="mt-4 text-xs leading-relaxed text-white/50 line-clamp-4">
+                  {item.description}
+                </p>
 
-              <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between">
-                {item.mou_file_url ? (
-                  <a
-                    href={item.mou_file_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-[#68d32f] hover:underline font-semibold flex items-center gap-1"
-                  >
-                    View Official MoU Document ↗
-                  </a>
-                ) : (
-                  <span className="text-xs text-white/40 font-mono">Verified Institutional MoU</span>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between">
+                  {item.mou_file_url ? (
+                    <a
+                      href={item.mou_file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-[#68d32f] hover:underline font-semibold flex items-center gap-1"
+                    >
+                      View Official MoU Document ↗
+                    </a>
+                  ) : (
+                    <span className="text-xs text-white/40 font-mono">Verified Institutional MoU</span>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

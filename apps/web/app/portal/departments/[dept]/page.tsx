@@ -21,6 +21,7 @@ import {
   Plus,
   Award,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -105,6 +106,33 @@ export default function DepartmentDeskPage() {
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
 
+  // Live items state for MoUs and Opportunities
+  const [liveMous, setLiveMous] = useState<any[]>([]);
+  const [liveOpps, setLiveOpps] = useState<any[]>([]);
+  const [loadingLive, setLoadingLive] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const fetchLiveItems = useCallback(async () => {
+    if (deptKey !== "EXECUTIVE_COUNCIL" && deptKey !== "RESEARCH_PUBLICATION") return;
+    setLoadingLive(true);
+    try {
+      const [mouRes, oppRes] = await Promise.all([
+        apiGet<{ collaborations: any[] }>("/api/v1/collaborations"),
+        apiGet<{ opportunities: any[] }>("/api/v1/opportunities"),
+      ]);
+      setLiveMous(mouRes.collaborations || []);
+      setLiveOpps(oppRes.opportunities || []);
+    } catch (err) {
+      console.error("Failed to fetch live items:", err);
+    } finally {
+      setLoadingLive(false);
+    }
+  }, [deptKey]);
+
+  useEffect(() => {
+    fetchLiveItems();
+  }, [fetchLiveItems]);
+
   const meta = DEPT_META[deptKey] || {
     name: `${deptKey.replace("_", " ")} Desk`,
     badge: "DEPARTMENT DESK",
@@ -124,6 +152,7 @@ export default function DepartmentDeskPage() {
       setPublishMsg("✓ Partner MoU published successfully to main website!");
       setMouForm({ title: "", institution: "", description: "", mouFileUrl: "" });
       setShowMouModal(false);
+      await fetchLiveItems();
     } catch (err: any) {
       setPublishMsg(`✗ ${err.message || "Failed to publish MoU"}`);
     } finally {
@@ -140,10 +169,55 @@ export default function DepartmentDeskPage() {
       setPublishMsg("✓ Opportunity announcement published successfully to main website!");
       setOppForm({ title: "", category: "FELLOWSHIP", description: "", deadline: "", applyUrl: "", attachmentUrl: "" });
       setShowOppModal(false);
+      await fetchLiveItems();
     } catch (err: any) {
       setPublishMsg(`✗ ${err.message || "Failed to publish opportunity"}`);
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleDeleteMou = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to remove MoU: "${title}"?`)) return;
+    setDeletingId(id);
+    try {
+      const token = typeof window !== "undefined" ? sessionStorage.getItem("gcc_session_token") : null;
+      const res = await fetch(`${API_BASE}/api/v1/collaborations/${id}`, {
+        method: "DELETE",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to delete MoU");
+      setPublishMsg(`✓ Removed MoU "${title}"`);
+      await fetchLiveItems();
+    } catch (err: any) {
+      setPublishMsg(`✗ ${err.message}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDeleteOpp = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to remove announcement: "${title}"?`)) return;
+    setDeletingId(id);
+    try {
+      const token = typeof window !== "undefined" ? sessionStorage.getItem("gcc_session_token") : null;
+      const res = await fetch(`${API_BASE}/api/v1/opportunities/${id}`, {
+        method: "DELETE",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to delete opportunity");
+      setPublishMsg(`✓ Removed opportunity "${title}"`);
+      await fetchLiveItems();
+    } catch (err: any) {
+      setPublishMsg(`✗ ${err.message}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -402,6 +476,116 @@ export default function DepartmentDeskPage() {
               </form>
             </Card>
           )}
+
+          {/* Live Published MoUs & Opportunities Management Table */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+            {/* MoUs Management */}
+            <Card className="glass-panel border-slate-800">
+              <CardHeader className="flex flex-row items-center justify-between py-4">
+                <div>
+                  <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-emerald-400" /> Active MoUs on Collaborations Page
+                  </CardTitle>
+                  <CardDescription className="text-[11px] text-slate-400">
+                    Live partnerships visible to the public. You can remove them at any time.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+                  {liveMous.length} LIVE
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {loadingLive ? (
+                  <div className="p-6 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" /> Loading MoUs…
+                  </div>
+                ) : liveMous.length === 0 ? (
+                  <p className="text-xs text-slate-500 p-4 text-center border border-dashed border-slate-800 rounded-lg">
+                    No active MoUs published yet. Click &quot;Publish New Partner MoU&quot; above to add one.
+                  </p>
+                ) : (
+                  liveMous.map((mou) => (
+                    <div
+                      key={mou.id}
+                      className="p-3 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-3 hover:border-slate-700 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white truncate">{mou.title}</span>
+                        </div>
+                        <p className="text-[11px] text-emerald-400/80 truncate">🏛 {mou.institution}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={deletingId === mou.id}
+                        onClick={() => handleDeleteMou(mou.id, mou.title)}
+                        className="h-7 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 shrink-0"
+                      >
+                        {deletingId === mou.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                        <span className="ml-1">Remove</span>
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Opportunities Management */}
+            <Card className="glass-panel border-slate-800">
+              <CardHeader className="flex flex-row items-center justify-between py-4">
+                <div>
+                  <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Award className="w-4 h-4 text-purple-400" /> Live Opportunity Announcements
+                  </CardTitle>
+                  <CardDescription className="text-[11px] text-slate-400">
+                    Live fellowships &amp; grants visible to students. You can remove them at any time.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-[10px] text-purple-400 border-purple-500/30">
+                  {liveOpps.length} LIVE
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {loadingLive ? (
+                  <div className="p-6 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" /> Loading opportunities…
+                  </div>
+                ) : liveOpps.length === 0 ? (
+                  <p className="text-xs text-slate-500 p-4 text-center border border-dashed border-slate-800 rounded-lg">
+                    No announcements posted yet. Click &quot;Post Opportunity Announcement&quot; above to add one.
+                  </p>
+                ) : (
+                  liveOpps.map((opp) => (
+                    <div
+                      key={opp.id}
+                      className="p-3 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-3 hover:border-slate-700 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white truncate">{opp.title}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                          <span className="text-purple-400 font-mono text-[10px]">{opp.category}</span>
+                          {opp.deadline && <span>• 📅 {opp.deadline}</span>}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={deletingId === opp.id}
+                        onClick={() => handleDeleteOpp(opp.id, opp.title)}
+                        className="h-7 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 shrink-0"
+                      >
+                        {deletingId === opp.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                        <span className="ml-1">Remove</span>
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 

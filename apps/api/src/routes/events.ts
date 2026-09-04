@@ -74,7 +74,7 @@ const runBackground = (c: any, promise: Promise<any>) => {
 // GET /api/v1/events — Public listing of published events
 eventsRouter.get('/', async (c) => {
   const result = await c.env.DB
-    .prepare('SELECT * FROM events WHERE event_status = "PUBLISHED" ORDER BY start_date ASC')
+    .prepare('SELECT * FROM events WHERE event_status IN ("PUBLISHED", "COMPLETED") ORDER BY start_date ASC')
     .all<DbEvent>();
   const events = result.results.map(dbEventToGccEvent);
   return c.json({ success: true, data: { events } });
