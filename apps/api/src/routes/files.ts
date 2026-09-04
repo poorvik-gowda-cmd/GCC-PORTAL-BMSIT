@@ -87,6 +87,66 @@ filesRouter.get('/list', async (c) => {
 });
 
 // ----------------------------------------------------------
+// 1b. POST /api/v1/files/setup-departments — Configure Drive Folders & Permissions
+// ----------------------------------------------------------
+filesRouter.post('/setup-departments', async (c) => {
+  const user = c.get('user');
+  const isPrivileged = user.roles.includes('SYSTEM_SUPER_ADMIN') || user.roles.includes('EXECUTIVE_COUNCIL');
+  if (!isPrivileged) {
+    return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Only administrators can setup department folders.' } }, 403);
+  }
+
+  try {
+    const drive = new DriveClient({
+      clientEmail: c.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      privateKey: c.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
+    });
+
+    const body = await c.req.json().catch(() => ({} as Record<string, any>));
+    const userEmail = body.email || 'poorvikgowda30@gmail.com';
+
+    const departments = ['PHOTOGRAPHY', 'DESIGN', 'RESEARCH_PUBLICATION', 'EXECUTIVE_COUNCIL'];
+    const results: Record<string, any> = {};
+
+    for (const dept of departments) {
+      try {
+        const folderId = await drive.findOrCreateFolder(c.env.GOOGLE_DRIVE_ROOT_FOLDER_ID, dept);
+
+        // 1. Give the owner/admin email full writer/editor access
+        const userPerm = await drive.addPermission(folderId, {
+          role: 'writer',
+          type: 'user',
+          emailAddress: userEmail,
+        });
+
+        // 2. For non-executive branches, set 'anyone with the link can edit'
+        let publicPerm = null;
+        if (dept !== 'EXECUTIVE_COUNCIL') {
+          publicPerm = await drive.addPermission(folderId, {
+            role: 'writer',
+            type: 'anyone',
+          });
+        }
+
+        results[dept] = {
+          folderId,
+          driveUrl: `https://drive.google.com/drive/folders/${folderId}`,
+          userPermission: userPerm,
+          publicPermission: publicPerm,
+        };
+      } catch (err: any) {
+        results[dept] = { error: err.message };
+      }
+    }
+
+    return c.json({ success: true, data: { userEmail, results } });
+  } catch (err: any) {
+    console.error('[Drive Setup Error]', err.message);
+    return c.json({ success: false, error: { code: 'DRIVE_ERROR', message: err.message } }, 500);
+  }
+});
+
+// ----------------------------------------------------------
 // 2. POST /api/v1/files/upload — Upload file to Google Drive branch
 // ----------------------------------------------------------
 filesRouter.post('/upload', async (c) => {

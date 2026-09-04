@@ -153,4 +153,29 @@ export class DriveClient {
     const createdData = (await createResp.json()) as { id: string };
     return createdData.id;
   }
+
+  /**
+   * Set or add a permission on a file or folder.
+   */
+  async addPermission(
+    fileId: string,
+    permission: { role: string; type: string; emailAddress?: string }
+  ): Promise<any> {
+    const token = await this.getToken();
+    const url = `${DRIVE_BASE}/files/${fileId}/permissions?sendNotificationEmail=false`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(permission),
+    });
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.error(`[Drive Permission Error] ${resp.status}:`, errText);
+      return { success: false, error: errText };
+    }
+    return await resp.json();
+  }
 }
