@@ -79,7 +79,7 @@ filesRouter.get('/list', async (c) => {
     const folderId = await drive.findOrCreateFolder(c.env.GOOGLE_DRIVE_ROOT_FOLDER_ID, departmentId);
     const files = await drive.listFiles(folderId);
 
-    return c.json({ success: true, data: { files } });
+    return c.json({ success: true, data: { files, folderId } });
   } catch (err: any) {
     console.error('[Drive List Error]', err.message);
     return c.json({ success: false, error: { code: 'DRIVE_ERROR', message: 'Failed to list folder files' } }, 500);

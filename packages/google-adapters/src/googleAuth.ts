@@ -26,10 +26,17 @@ const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // refresh 5 min before expiry
 const FETCH_TIMEOUT_MS = 10_000;
 
 async function importPrivateKey(pem: string): Promise<CryptoKey> {
-  const pemContents = pem
+  let pemContents = pem
+    .replace(/^["']|["']$/g, '')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
     .replace(/-----BEGIN (RSA )?PRIVATE KEY-----/g, '')
     .replace(/-----END (RSA )?PRIVATE KEY-----/g, '')
-    .replace(/\s+/g, '');
+    .replace(/[^A-Za-z0-9+/=]/g, '');
+
+  while (pemContents.length % 4 !== 0) {
+    pemContents += '=';
+  }
 
   const binaryDer = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
 
