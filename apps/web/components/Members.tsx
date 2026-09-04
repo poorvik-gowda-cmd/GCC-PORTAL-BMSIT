@@ -20,7 +20,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MemberCard from "./members/MemberCard";
 import MemberProfileOverlay from "./members/MemberProfileOverlay";
 import { elegantEase } from "./members/constants";
-import { Award, ShieldCheck, ChevronRight } from "lucide-react";
+import { Award, ShieldCheck } from "lucide-react";
 
 // ─── Animation variants (unchanged from original) ───────────────────────────
 const containerVariants = {
@@ -112,7 +112,9 @@ function DepartmentSection({
   onSelect: (m: Member) => void;
   onHover: (id: string | null) => void;
 }) {
-  const leadMember = toMember(dept.lead, dept.name, dept.name, dept.clubName);
+  const leadMember = dept.lead
+    ? toMember(dept.lead, dept.name, dept.name, dept.clubName)
+    : null;
   const deptMembers = dept.members.map((m) =>
     toMember(m, dept.name, dept.name, dept.clubName)
   );
@@ -138,24 +140,26 @@ function DepartmentSection({
       </div>
 
       {/* Team Lead */}
-      <div>
-        <div className="mb-4 flex items-center gap-2">
-          <Award className="w-3.5 h-3.5 text-[#5eea19]" />
-          <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-            Team Lead
-          </p>
+      {leadMember && (
+        <div>
+          <div className="mb-4 flex items-center gap-2">
+            <Award className="w-3.5 h-3.5 text-[#5eea19]" />
+            <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+              Team Lead
+            </p>
+          </div>
+          <HierarchyGrid
+            members={[leadMember]}
+            hoveredId={hoveredId}
+            selectedId={selectedId}
+            isProfileOpen={isProfileOpen}
+            imageY={imageY}
+            onSelect={onSelect}
+            onHover={onHover}
+            cols="xl:grid-cols-3"
+          />
         </div>
-        <HierarchyGrid
-          members={[leadMember]}
-          hoveredId={hoveredId}
-          selectedId={selectedId}
-          isProfileOpen={isProfileOpen}
-          imageY={imageY}
-          onSelect={onSelect}
-          onHover={onHover}
-          cols="xl:grid-cols-3"
-        />
-      </div>
+      )}
 
       {/* Members */}
       {deptMembers.length > 0 && (
@@ -304,19 +308,6 @@ export default function Members() {
             <h2 className="text-4xl font-bold uppercase leading-tight tracking-[-0.04em] text-white md:text-5xl">
               Executive Council
             </h2>
-            <div className="mt-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/25">
-              <span className="rounded border border-[#5eea19]/30 px-2 py-1 text-[#5eea19]/70">
-                President
-              </span>
-              <ChevronRight className="w-3 h-3" />
-              <span className="rounded border border-white/15 px-2 py-1">
-                Executive Council
-              </span>
-              <ChevronRight className="w-3 h-3" />
-              <span className="rounded border border-white/15 px-2 py-1">
-                Departments
-              </span>
-            </div>
           </motion.div>
 
           {/* President */}
@@ -352,7 +343,7 @@ export default function Members() {
               imageY={imageY}
               onSelect={handleSelectMember}
               onHover={setHoveredMemberId}
-              cols="xl:grid-cols-5"
+              cols="xl:grid-cols-4"
             />
           </motion.div>
         </motion.div>

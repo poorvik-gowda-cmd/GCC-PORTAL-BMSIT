@@ -29,7 +29,7 @@ export interface HierarchyDepartment {
   id: string;
   name: string;
   clubName: string;
-  lead: HierarchyMember;
+  lead?: HierarchyMember | null;
   members: HierarchyMember[];
 }
 
@@ -81,14 +81,6 @@ export const EXECUTIVE_COUNCIL_MEMBERS: HierarchyMember[] = [
     intro: "Serving as Chair of the Advisory Council on the Executive Council, providing guidance, governance, and strategic direction to GCC.",
     social: {},
   },
-  {
-    id: "ec-member-5",
-    name: "EC_MEMBER_5_NAME",
-    role: "EC_MEMBER_5_ROLE",
-    photo: null,
-    intro: "EC_MEMBER_5_INTRO_PLACEHOLDER",
-    social: {},
-  },
 ];
 
 // ──────────────────────────────────────────────
@@ -126,14 +118,6 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
         role: "Research Associate",
         photo: "/images/logo/members/navneeth.png",
         intro: "Contributing to GCC's research initiatives with enthusiasm and dedication, exploring global education trends and collaboration opportunities.",
-        social: {},
-      },
-      {
-        id: "research-member-3",
-        name: "RESEARCH_MEMBER_3_NAME",
-        role: "Research Associate",
-        photo: null,
-        intro: "RESEARCH_MEMBER_3_INTRO_PLACEHOLDER",
         social: {},
       },
     ],
@@ -176,14 +160,6 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
         role: "Events Associate",
         photo: "/images/logo/members/syed.png",
         intro: "Supporting events and operations at GCC, ensuring seamless organization and impactful execution for every initiative.",
-        social: {},
-      },
-      {
-        id: "events-member-4",
-        name: "EVENTS_MEMBER_4_NAME",
-        role: "Events Associate",
-        photo: null,
-        intro: "EVENTS_MEMBER_4_INTRO_PLACEHOLDER",
         social: {},
       },
     ],
@@ -246,14 +222,6 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
     id: "design",
     name: "Design & Creative",
     clubName: "GAMMA PHI",
-    lead: {
-      id: "design-lead",
-      name: "DESIGN_LEAD_NAME",
-      role: "Design & Creative — Team Lead",
-      photo: null,
-      intro: "DESIGN_LEAD_INTRO_PLACEHOLDER",
-      social: {},
-    },
     members: [
       {
         id: "design-poorvik",
@@ -376,14 +344,6 @@ export const GCC_DEPARTMENTS: HierarchyDepartment[] = [
         intro: "Capturing dynamic visual media and documenting GCC events with creativity and precision.",
         social: {},
       },
-      {
-        id: "photo-member-2",
-        name: "PHOTO_MEMBER_2_NAME",
-        role: "Photography Associate",
-        photo: null,
-        intro: "PHOTO_MEMBER_2_INTRO_PLACEHOLDER",
-        social: {},
-      },
     ],
   },
 ];
@@ -454,7 +414,9 @@ export function buildHierarchyMemberMap(): Map<string, Member> {
   );
 
   GCC_DEPARTMENTS.forEach((dept) => {
-    addMember(dept.lead, dept.name, dept.name, dept.clubName);
+    if (dept.lead) {
+      addMember(dept.lead, dept.name, dept.name, dept.clubName);
+    }
     dept.members.forEach((m) =>
       addMember(m, dept.name, dept.name, dept.clubName)
     );
