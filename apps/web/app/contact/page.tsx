@@ -1,4 +1,4 @@
-﻿import { MapPin, Mail, Globe } from "lucide-react";
+import { MapPin, Mail, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,15 @@ export default function ContactPage() {
             </div>
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-blue-400 shrink-0" />
-              <div><strong className="text-white block">Official Email</strong> gcc@bmsit.in</div>
+              <div>
+                <strong className="text-white block">Official Email</strong>
+                <a
+                  href="mailto:gccresearchandoperations@gmail.com"
+                  className="hover:underline hover:text-white transition-colors break-all"
+                >
+                  gccresearchandoperations@gmail.com
+                </a>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Globe className="w-5 h-5 text-blue-400 shrink-0" />

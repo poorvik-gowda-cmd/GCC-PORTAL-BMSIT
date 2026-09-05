@@ -79,14 +79,18 @@ export default function Contact() {
             </motion.p>
 
             <motion.div variants={textReveal} className="mt-12 space-y-6">
-              <div className="p-6 rounded-2xl border border-white/10 bg-[#0a0c0a]">
+              <a
+                href="mailto:gccresearchandoperations@gmail.com"
+                className="group/mail block p-6 rounded-2xl border border-white/10 bg-[#0a0c0a] hover:border-[#68d32f]/60 hover:bg-white/[0.04] transition-all"
+              >
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#68d32f]">
                   Official Email
                 </p>
-                <p className="mt-2 text-xl font-semibold text-white">
-                  gcc@bmsit.in
+                <p className="mt-2 text-base sm:text-lg md:text-xl font-semibold text-white group-hover/mail:text-[#68d32f] transition-colors break-all flex items-center justify-between">
+                  <span>gccresearchandoperations@gmail.com</span>
+                  <span className="text-xs text-[#68d32f] opacity-0 group-hover/mail:opacity-100 transition-opacity ml-2">↗</span>
                 </p>
-              </div>
+              </a>
 
               <div className="p-6 rounded-2xl border border-white/10 bg-[#0a0c0a]">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#68d32f]">
