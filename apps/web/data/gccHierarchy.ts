@@ -37,10 +37,19 @@ export interface HierarchyDepartment {
 // EXECUTIVE COUNCIL  |  Club: KAPPA ALPHA
 // ──────────────────────────────────────────────
 
+export const GCC_CHAIR_ADVISORY: HierarchyMember = {
+  id: "ec-devangi",
+  name: "Devangi Sood",
+  role: "Chair - Advisory Council",
+  photo: "/images/logo/members/devangi.png",
+  intro: "Serving as Chair of the Advisory Council on the Executive Council, providing guidance, governance, and strategic direction to GCC.",
+  social: {},
+};
+
 export const GCC_PRESIDENT: HierarchyMember = {
   id: "ec-president",
-  name: "Abhyuday",
-  role: "President & Global Director",
+  name: "Abhyuday Akasi",
+  role: "President and Global Director",
   photo: "/images/logo/members/abhyuday.png",
   intro: "Leading the Global Collaboration Cell as President and Global Director, driving GCC's mission to build cross-border partnerships and create transformative opportunities for students at BMSIT.",
   social: {},
@@ -48,8 +57,16 @@ export const GCC_PRESIDENT: HierarchyMember = {
 
 export const EXECUTIVE_COUNCIL_MEMBERS: HierarchyMember[] = [
   {
+    id: "ec-lohith",
+    name: "Lohith Shriram",
+    role: "Executive Director",
+    photo: "/images/logo/members/lohith.png",
+    intro: "Serving as Executive Director on the Executive Council, guiding strategic initiatives and advancing GCC's mission across all chapters.",
+    social: {},
+  },
+  {
     id: "ec-sumukh",
-    name: "Sumukh R",
+    name: "Sumukh -R",
     role: "Managing Director",
     photo: "/images/logo/members/8.png",
     animePhoto: "/images/logo/members/anime/sumukh-r.jpg",
@@ -63,22 +80,6 @@ export const EXECUTIVE_COUNCIL_MEMBERS: HierarchyMember[] = [
     photo: "/images/logo/members/9.png",
     animePhoto: "/images/logo/members/anime/manvil-g-shetty.jpg",
     intro: "Cultivating strategic partnerships with international organizations, universities, and industry leaders to expand GCC's global network.",
-    social: {},
-  },
-  {
-    id: "ec-lohith",
-    name: "Lohith Shriram",
-    role: "Executive Director",
-    photo: "/images/logo/members/lohith.png",
-    intro: "Serving as Executive Director on the Executive Council, guiding strategic initiatives and advancing GCC's mission across all chapters.",
-    social: {},
-  },
-  {
-    id: "ec-devangi",
-    name: "Devangi Sood",
-    role: "Chair-Advisory Council",
-    photo: "/images/logo/members/devangi.png",
-    intro: "Serving as Chair of the Advisory Council on the Executive Council, providing guidance, governance, and strategic direction to GCC.",
     social: {},
   },
 ];
@@ -408,6 +409,7 @@ export function buildHierarchyMemberMap(): Map<string, Member> {
     }
   };
 
+  addMember(GCC_CHAIR_ADVISORY, "Executive Council", "Executive Council", "KAPPA ALPHA");
   addMember(GCC_PRESIDENT, "Executive Council", "Executive Council", "KAPPA ALPHA");
   EXECUTIVE_COUNCIL_MEMBERS.forEach((m) =>
     addMember(m, "Executive Council", "Executive Council", "KAPPA ALPHA")

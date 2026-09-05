@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  GCC_CHAIR_ADVISORY,
   GCC_PRESIDENT,
   EXECUTIVE_COUNCIL_MEMBERS,
   GCC_DEPARTMENTS,
@@ -194,6 +195,10 @@ export default function Members() {
   const hierarchyMap = useMemo(() => buildHierarchyMemberMap(), []);
 
   // Convert hierarchy members to Member shape for use with MemberCard
+  const chairAdvisoryMember = useMemo(
+    () => toMember(GCC_CHAIR_ADVISORY, "Executive Council", "Executive Council", "KAPPA ALPHA"),
+    []
+  );
   const presidentMember = useMemo(
     () => toMember(GCC_PRESIDENT, "Executive Council", "Executive Council", "KAPPA ALPHA"),
     []
@@ -310,12 +315,32 @@ export default function Members() {
             </h2>
           </motion.div>
 
-          {/* President */}
+          {/* Chair - Advisory Council */}
           <motion.div variants={fadeUp}>
             <div className="mb-4 flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-[#5eea19]" />
               <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                President
+                Chair - Advisory Council
+              </p>
+            </div>
+            <HierarchyGrid
+              members={[chairAdvisoryMember]}
+              hoveredId={hoveredMemberId}
+              selectedId={selectedMemberId}
+              isProfileOpen={isProfileOpen}
+              imageY={imageY}
+              onSelect={handleSelectMember}
+              onHover={setHoveredMemberId}
+              cols="xl:grid-cols-3"
+            />
+          </motion.div>
+
+          {/* President and Global Director */}
+          <motion.div variants={fadeUp}>
+            <div className="mb-4 flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#5eea19]" />
+              <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+                President and Global Director
               </p>
             </div>
             <HierarchyGrid
